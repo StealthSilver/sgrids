@@ -64,7 +64,7 @@ export const Hero = () => {
               | BESS | Green Hydrogen
             </p>
             <div className="flex justify-center mt-[40px]">
-              <button className="btn-cta py-4 px-10 text-xl sm:text-m sm:px-4 sm:py-2">
+              <button className="btn-cta md:py-4 md:px-10 text-xl text-m px-4 py-2">
                 BOOK A DEMO
               </button>
             </div>
