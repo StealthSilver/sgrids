@@ -8,8 +8,8 @@ import './globals.css';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'MeshSpire - Transform Your Digital Presence',
-  description: 'Innovative digital solutions that inspire and engage your audience.',
+  title: 'MeshSpire - Learn the better way',
+  description: 'A peer to peer learning platform',
 };
 
 export default function RootLayout({
