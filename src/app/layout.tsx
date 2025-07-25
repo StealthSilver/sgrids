@@ -1,31 +1,30 @@
-import type { Metadata } from "next";
-import { IBM_Plex_Sans } from "next/font/google";
-import "./globals.css";
-import clsx from "clsx";
-const ibmPlexSans = IBM_Plex_Sans({
-  subsets: ["latin"],
-  weight: ["400", "700"],
-});
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import { ThemeProvider } from 'next-themes';
+import Navbar from '@/components/layout/Navbar';
+import Footer from '@/components/layout/Footer';
+import './globals.css';
+
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: "Sgrids",
-  description: "Smart Grid Analytics Landing Page",
-  
-  icons: {
-    icon: "/favicon.ico", 
-  }
+  title: 'MeshSpire - Transform Your Digital Presence',
+  description: 'Innovative digital solutions that inspire and engage your audience.',
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en" className="relative">
-      
-      <body className={clsx(ibmPlexSans.className, "antialiased bg-[#ffffff]")}>
-        {children}
+    <html lang="en" suppressHydrationWarning>
+      <body className={inter.className}>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <Navbar />
+          {children}
+          <Footer />
+        </ThemeProvider>
       </body>
     </html>
   );

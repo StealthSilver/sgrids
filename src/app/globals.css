@@ -4,10 +4,10 @@
 
 @layer components {
   .btn-cta {
-    @apply bg-[#EB522E] text-white px-4 py-2  rounded-full font-semibold inline-flex items-center justify-center tracking-tight hover:bg-black transition-colors duration-300;
+    @apply bg-[#3BAB48] text-white px-4 py-2  rounded-full font-semibold inline-flex items-center justify-center tracking-tight hover:bg-black transition-colors duration-300;
   }
   .section-title {
-    @apply text-center text-3xl md:text-[54px] md:leading-[60px] font-bold tracking-tighter bg-gradient-to-b from-black to-[#001E80] text-transparent bg-clip-text;
+    @apply text-center text-3xl md:text-[54px] md:leading-[60px] font-bold tracking-tighter bg-gradient-to-b from-black to-[#622ACB] text-transparent bg-clip-text;
   }
 
   .section-description {
@@ -22,3 +22,5 @@
     @apply text-sm inline-flex border border-[#222]/10 px-3 py-1 rounded-lg tracking-tight;
   }
 }
+
+/* #622ACB - purple */
