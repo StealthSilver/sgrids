@@ -45,14 +45,14 @@ export const Footer = () => {
           </Link>
         ))}
       </div>
-     
-      <div className="flex justify-between gap-10 items-center  ">
-        <div className="flex flex-col max-w-[40%] gap-3  text-left  text-md text-gray-500 dark:text-gray-400 mt-6">
+
+      <div className="flex justify-between gap-10 items-center flex-col sm:flex-row ">
+        <div className="flex flex-col w-full md:max-w-[40%] gap-3  text-left  text-md text-gray-500 dark:text-gray-400 mt-6">
           <p>
             LinkedIn:  <Link href="https://www.linkedin.com/company/smart-grid-analytics/" className="hover:text-blue-500">
-            smart-grid-analytics
+              smart-grid-analytics
 
-      </Link>
+            </Link>
           </p>
           <p>
             Email: <a href="mailto:info@sgrids.io" className="hover:text-blue-500">info@sgrids.io</a>
@@ -60,28 +60,28 @@ export const Footer = () => {
           <p>Contact: +91 8883772216</p>
           <p>
             ADDRESS:
-           
-          </p>
-           <p>
-              Smart Grid Analytics Private Limited
-              Msm Plaza, 2nd floor, service rd, opp. Kallumantapa, Banaswadi, Bangalore, Karnataka – 560043
 
-            </p>
+          </p>
+          <p>
+            Smart Grid Analytics Private Limited
+            Msm Plaza, 2nd floor, service rd, opp. Kallumantapa, Banaswadi, Bangalore, Karnataka – 560043
+
+          </p>
 
 
 
 
         </div>
-        <div className="w-full h-64 rounded-md overflow-hidden border border-gray-300 max-w-[50%]">
-  <iframe
-    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3887.967453688077!2d77.63840517507828!3d13.01128638729659!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bae11111bac8741%3A0x36fbfa445db2acd8!2sSmart%20Grid%20Analytics%20Pvt%20Ltd!5e0!3m2!1sen!2sin!4v1730143726193!5m2!1sen!2sin"
-    width="100%"
-    height="100%"
-    style={{ border: 0 }}
-    loading="lazy"
-    allowFullScreen
-    referrerPolicy="no-referrer-when-downgrade"
-  ></iframe>
+        <div className="w-full h-64 rounded-md overflow-hidden border border-gray-300 w-full md:max-w-[50%]">
+          <iframe
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3887.967453688077!2d77.63840517507828!3d13.01128638729659!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bae11111bac8741%3A0x36fbfa445db2acd8!2sSmart%20Grid%20Analytics%20Pvt%20Ltd!5e0!3m2!1sen!2sin!4v1730143726193!5m2!1sen!2sin"
+            width="100%"
+            height="100%"
+            style={{ border: 0 }}
+            loading="lazy"
+            allowFullScreen
+            referrerPolicy="no-referrer-when-downgrade"
+          ></iframe>
           {/* <MapComponent/> */}
         </div>
 
