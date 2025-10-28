@@ -43,7 +43,7 @@ export default function Navbar() {
         >
           <motion.img
             key={mounted ? theme : "default"}
-            src={theme==="dark"?"/logo.svg":"/dark-logo.svg"}
+            src={theme==="dark"?"/logo.svg":"/logo.svg"}
             alt="SGrids logo"
             className="w-28 h-auto sm:w-32 md:w-36 cursor-pointer"
             initial={{ opacity: 0 }}

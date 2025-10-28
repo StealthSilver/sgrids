@@ -6,6 +6,7 @@ import ThreeGlobe from "three-globe";
 import { useThree, Canvas, extend } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import countries from "@/data/globe.json";
+import { useTheme } from "next-themes";
 
 declare module "@react-three/fiber" {
   interface ThreeElements {
@@ -64,6 +65,7 @@ interface WorldProps {
 
 export const Globe = ({ globeConfig, data }: WorldProps) => {
   const globeRef = useRef<ThreeGlobe | null>(null);
+  const {theme} = useTheme();
   const groupRef = useRef();
   const [isInitialized, setIsInitialized] = useState(false);
 
@@ -73,8 +75,8 @@ export const Globe = ({ globeConfig, data }: WorldProps) => {
     showAtmosphere: true,
     atmosphereAltitude: 0.1,
     polygonColor: "rgba(255,255,255,0.7)",
-    globeColor: "#1d072e",
-    emissive: "#000000",
+    globeColor: theme==="dark"?"#1d072e":"#e6eef6",
+    emissive: theme==="dark"?"#000000":"#ffffff",
     emissiveIntensity: 0.1,
     shininess: 0.9,
     arcTime: 2000,
