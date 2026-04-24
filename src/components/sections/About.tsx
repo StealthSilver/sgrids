@@ -59,14 +59,16 @@ export const About = () => {
               alt="About Smart Grid Analytics"
               className="w-[90%] sm:w-[70%] md:w-[55%] lg:w-[48%] max-w-[520px] object-contain select-none"
               style={{
-                opacity: isDarkMode ? 0.5 : 0.70,
-                filter: `blur(6px) saturate(1.1) ${
+                opacity: isDarkMode ? 0.5 : 0.7,
+                filter: `${isDarkMode ? "blur(6px)" : "blur(3px)"} saturate(1.1) ${
                   isDarkMode ? "brightness(1.1)" : "brightness(1.05)"
                 }`,
-                WebkitMaskImage:
-                  "radial-gradient(circle at 50% 50%, #000 42%, rgba(0,0,0,0.6) 62%, rgba(0,0,0,0) 82%)",
-                maskImage:
-                  "radial-gradient(circle at 50% 50%, #000 42%, rgba(0,0,0,0.6) 62%, rgba(0,0,0,0) 82%)",
+                WebkitMaskImage: isDarkMode
+                  ? "radial-gradient(circle at 50% 50%, #000 42%, rgba(0,0,0,0.6) 62%, rgba(0,0,0,0) 82%)"
+                  : "radial-gradient(circle at 50% 50%, #000 50%, rgba(0,0,0,0.55) 70%, rgba(0,0,0,0) 86%)",
+                maskImage: isDarkMode
+                  ? "radial-gradient(circle at 50% 50%, #000 42%, rgba(0,0,0,0.6) 62%, rgba(0,0,0,0) 82%)"
+                  : "radial-gradient(circle at 50% 50%, #000 50%, rgba(0,0,0,0.55) 70%, rgba(0,0,0,0) 86%)",
               }}
             />
           </div>
