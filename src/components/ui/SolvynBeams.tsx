@@ -67,7 +67,12 @@ export const SolvynBeams: React.FC<SolvynBeamsProps> = ({
       {/* Connection lines */}
       {points &&
         points.targets.map((target, i) => {
-          const pathD = createCurvedPath(points.origin.x, points.origin.y, target.x, target.y);
+          // Per-target origin override so that beams can emanate from the
+          // left or right edge of the central logo depending on which side
+          // the icon sits on. Falls back to `points.origin` for layouts
+          // that don't need this (e.g. the Services beams).
+          const originPoint = points.originsPerTarget?.[i] ?? points.origin;
+          const pathD = createCurvedPath(originPoint.x, originPoint.y, target.x, target.y);
           return (
             <g key={`line-${i}`}>
               {/* Base line - gray */}

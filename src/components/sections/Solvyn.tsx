@@ -103,8 +103,11 @@ export const Solvyn: React.FC = () => {
   // Screen size detection for responsive layout
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
+
     const checkScreenSize = () => {
       const width = window.innerWidth;
       setIsMobile(width < 640); // sm breakpoint
@@ -144,53 +147,186 @@ export const Solvyn: React.FC = () => {
     0, 0.091, 0.182, 0.273, 0.364, 0.455, 0.545, 0.636, 0.727, 0.818, 0.909, 1.0,
   ]);
 
-  // Measure positions - use useCallback to prevent recreation
+  // Measure positions - use useCallback to prevent recreation.
+  // Beams must start from the LEFT or RIGHT border of the central Solvyn
+  // logo (depending on which side the target icon sits on) and land at the
+  // OPPOSING horizontal edge of each icon square — i.e. icons to the left of
+  // the logo receive a beam at the center of their right border, and icons
+  // to the right of the logo receive a beam at the center of their left
+  // border. This produces a clean hub-and-spoke look where every line
+  // terminates exactly on the icon's edge.
   const measure = useCallback(() => {
-      const container = containerRef.current;
-      const sgridsEl = sgridsRef.current;
-      if (!container || !sgridsEl) return;
+    const container = containerRef.current;
+    const sgridsEl = sgridsRef.current;
+    if (!container || !sgridsEl) return;
 
-      const containerRect = container.getBoundingClientRect();
-      const sgridsRect = sgridsEl.getBoundingClientRect();
+    const containerRect = container.getBoundingClientRect();
+    if (containerRect.width === 0 || containerRect.height === 0) return;
 
-      const origin = {
-        x: sgridsRect.left + sgridsRect.width / 2 - containerRect.left,
-        y: sgridsRect.top + sgridsRect.height / 2 - containerRect.top,
-      };
+    const sgridsRect = sgridsEl.getBoundingClientRect();
+    if (sgridsRect.width === 0 || sgridsRect.height === 0) return;
 
-      const targets: { x: number; y: number }[] = [];
+    // Center-left and center-right edges of the Solvyn logo, in container
+    // coordinates. The vertical center is shared by both.
+    const logoCenterY = sgridsRect.top + sgridsRect.height / 2 - containerRect.top;
+    const leftEdge = {
+      x: sgridsRect.left - containerRect.left,
+      y: logoCenterY,
+    };
+    const rightEdge = {
+      x: sgridsRect.right - containerRect.left,
+      y: logoCenterY,
+    };
+    const logoCenterX = sgridsRect.left + sgridsRect.width / 2 - containerRect.left;
+
+    const targets: { x: number; y: number }[] = [];
+    const originsPerTarget: { x: number; y: number }[] = [];
 
     for (const ref of iconRefs) {
       const el = ref.current;
-        if (!el) continue;
-        const r = el.getBoundingClientRect();
-        targets.push({
-          x: r.left + r.width / 2 - containerRect.left,
-          y: r.top + r.height / 2 - containerRect.top,
-        });
-      }
+      if (!el) continue;
+      // Prefer the inner icon square (marked via data-beam-target) so we
+      // land on the actual border of the icon, not the outer column that
+      // also contains the text label.
+      const targetEl = (el.querySelector("[data-beam-target]") as HTMLElement | null) || el;
+      const r = targetEl.getBoundingClientRect();
+      if (r.width === 0 && r.height === 0) continue;
 
-    if (targets.length === 12) {
-      setPoints((prevPoints) => {
-        // Only update if points actually changed
-        const prevStr = JSON.stringify(prevPoints);
-        const newPoints = { origin, targets };
-        const newStr = JSON.stringify(newPoints);
-        if (prevStr === newStr) return prevPoints;
-        return newPoints;
-      });
+      const iconCenterY = r.top + r.height / 2 - containerRect.top;
+      const iconCenterX = r.left + r.width / 2 - containerRect.left;
+
+      // Icons to the left of the logo connect out of the LEFT edge of the
+      // logo and into the RIGHT edge of the icon. Icons to the right of the
+      // logo connect out of the RIGHT edge of the logo and into the LEFT
+      // edge of the icon.
+      const isLeftSide = iconCenterX < logoCenterX;
+      if (isLeftSide) {
+        targets.push({
+          x: r.right - containerRect.left,
+          y: iconCenterY,
+        });
+        originsPerTarget.push(leftEdge);
+      } else {
+        targets.push({
+          x: r.left - containerRect.left,
+          y: iconCenterY,
+        });
+        originsPerTarget.push(rightEdge);
+      }
     }
-  }, []);
+
+    if (targets.length !== 12) return;
+
+    // Keep a single `origin` for backward compatibility (used by consumers
+    // that don't know about per-target origins); the per-target overrides
+    // are what actually drive the rendered paths.
+    const origin = {
+      x: logoCenterX,
+      y: logoCenterY,
+    };
+
+    setPoints((prevPoints) => {
+      const tolerance = 1;
+      if (prevPoints && prevPoints.originsPerTarget && prevPoints.originsPerTarget.length === originsPerTarget.length) {
+        const originChanged =
+          Math.abs(prevPoints.origin.x - origin.x) > tolerance ||
+          Math.abs(prevPoints.origin.y - origin.y) > tolerance;
+        const targetsChanged = prevPoints.targets.some((t, i) => {
+          const n = targets[i];
+          if (!n) return true;
+          return Math.abs(t.x - n.x) > tolerance || Math.abs(t.y - n.y) > tolerance;
+        });
+        const originsChanged = prevPoints.originsPerTarget.some((o, i) => {
+          const n = originsPerTarget[i];
+          if (!n) return true;
+          return Math.abs(o.x - n.x) > tolerance || Math.abs(o.y - n.y) > tolerance;
+        });
+        if (!originChanged && !targetsChanged && !originsChanged) return prevPoints;
+      }
+      return { origin, targets, originsPerTarget };
+    });
+  }, [iconRefs]);
 
   useEffect(() => {
-    measure();
-    window.addEventListener("resize", measure);
-    const id = setTimeout(measure, 300);
-    return () => {
-      window.removeEventListener("resize", measure);
-      clearTimeout(id);
+    if (!mounted) return;
+
+    const scheduleMeasure = () => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(measure);
+      });
     };
-  }, [measure, isMobile, isTablet]);
+
+    const resizeObserver = new ResizeObserver(scheduleMeasure);
+
+    const observeElements = () => {
+      if (containerRef.current) resizeObserver.observe(containerRef.current);
+      if (sgridsRef.current) resizeObserver.observe(sgridsRef.current);
+      iconRefs.forEach((ref) => {
+        if (ref.current) resizeObserver.observe(ref.current);
+      });
+    };
+
+    observeElements();
+
+    // IntersectionObserver: re-run measurements whenever the section scrolls
+    // into view. The framer-motion `whileInView` entry animations start the
+    // container at scale 0.9, which gives slightly off bounding boxes until
+    // the animation settles. Without this observer, we'd measure too early
+    // and never re-measure once the entry animation completes.
+    let intersectionTimers: ReturnType<typeof setTimeout>[] = [];
+    const intersectionObserver = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (entry?.isIntersecting) {
+          intersectionTimers.forEach((t) => clearTimeout(t));
+          intersectionTimers = [
+            setTimeout(scheduleMeasure, 0),
+            setTimeout(scheduleMeasure, 100),
+            setTimeout(scheduleMeasure, 300),
+            setTimeout(scheduleMeasure, 600),
+            setTimeout(scheduleMeasure, 1000),
+            setTimeout(scheduleMeasure, 1500),
+          ];
+        }
+      },
+      { threshold: [0, 0.1, 0.25, 0.5] }
+    );
+    if (containerRef.current) {
+      intersectionObserver.observe(containerRef.current);
+    }
+
+    scheduleMeasure();
+
+    const handleResize = scheduleMeasure;
+    window.addEventListener("resize", handleResize);
+
+    const timers = [
+      setTimeout(scheduleMeasure, 50),
+      setTimeout(scheduleMeasure, 150),
+      setTimeout(scheduleMeasure, 400),
+      setTimeout(scheduleMeasure, 800),
+      setTimeout(scheduleMeasure, 1500),
+    ];
+
+    return () => {
+      resizeObserver.disconnect();
+      intersectionObserver.disconnect();
+      intersectionTimers.forEach((t) => clearTimeout(t));
+      window.removeEventListener("resize", handleResize);
+      timers.forEach((t) => clearTimeout(t));
+    };
+  }, [measure, isMobile, isTablet, mounted, iconRefs]);
+
+  // Trigger a fresh measurement after any of the entry animations complete
+  // (container scaling from 0.9 → 1, or the icon nodes fading in). Without
+  // this, we rely on setTimeouts racing the animation, which is what caused
+  // the "animation only works on refresh" bug.
+  const handleEntryAnimationComplete = useCallback(() => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(measure);
+      setTimeout(measure, 100);
+    });
+  }, [measure]);
 
   // Animation hook
   useSolvynAnimation({
@@ -301,6 +437,7 @@ export const Solvyn: React.FC = () => {
               whileInView={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8, delay: 0.2 }}
               viewport={{ once: true }}
+              onAnimationComplete={handleEntryAnimationComplete}
               className="relative flex items-center justify-center w-full"
               style={{ 
                 height: isMobile ? "100vh" : isTablet ? "100vh" : "90vh", 
@@ -317,6 +454,7 @@ export const Solvyn: React.FC = () => {
                   delay: 0.4,
                 }}
                 viewport={{ once: true }}
+                onAnimationComplete={handleEntryAnimationComplete}
                 className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20 flex flex-col items-center gap-2 sm:gap-3"
               >
               <div
@@ -369,6 +507,7 @@ export const Solvyn: React.FC = () => {
                     borderColor={borderColor}
                     isMobile={isMobile}
                     isTablet={isTablet}
+                    onEntryComplete={handleEntryAnimationComplete}
                   />
                 );
               })}

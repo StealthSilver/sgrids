@@ -16,6 +16,7 @@ type SolvynIconNodeProps = {
   borderColor?: "orange" | "purple";
   isMobile?: boolean;
   isTablet?: boolean;
+  onEntryComplete?: () => void;
 };
 
 export const SolvynIconNode: React.FC<SolvynIconNodeProps> = ({
@@ -26,6 +27,7 @@ export const SolvynIconNode: React.FC<SolvynIconNodeProps> = ({
   borderColor = "orange",
   isMobile = false,
   isTablet = false,
+  onEntryComplete,
 }) => {
   const isActive = icon.active;
   const activeBorderClass =
@@ -52,10 +54,12 @@ export const SolvynIconNode: React.FC<SolvynIconNodeProps> = ({
       whileInView={{ opacity: 1, x: 0, y: 0 }}
       transition={{ duration: 0.6, delay: animationDelay }}
       viewport={{ once: true }}
+      onAnimationComplete={onEntryComplete}
       className={`absolute flex flex-col items-center ${gapSize} cursor-pointer group z-10`}
       style={position}
     >
       <div
+        data-beam-target
         className={`relative ${iconPadding} rounded-xl border-2 transition-all duration-500 flex items-center justify-center ${
           isActive
             ? activeBorderClass
