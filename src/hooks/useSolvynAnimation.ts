@@ -29,6 +29,11 @@ export const useSolvynAnimation = ({
   const ACTIVE_DURATION = 800; // Keep icons active for 800ms after pulse passes
   const pathLengthsRef = useRef<number[]>([]);
   const startTimeRef = useRef<number | null>(null);
+  // Tracks the last computed active-state per icon index so we can skip
+  // invoking the React state setter entirely when nothing changed. Calling
+  // setIcons 60x/s (even when it bails out) was still scheduling work on the
+  // React scheduler every frame.
+  const activeStateRef = useRef<boolean[]>(Array(12).fill(false));
   
   // Update points ref when points change
   useEffect(() => {
@@ -39,44 +44,58 @@ export const useSolvynAnimation = ({
     const currentPoints = pointsRef.current;
     if (!currentPoints) return;
     const currentTime = Date.now();
+    const targets = currentPoints.targets;
+    const prevActive = activeStateRef.current;
+    let anyChanged = false;
+    const nextActive = new Array<boolean>(targets.length);
+
+    const thresholdSq = TOUCH_THRESHOLD * TOUCH_THRESHOLD;
+
+    for (let idx = 0; idx < targets.length; idx++) {
+      const pt = targets[idx];
+      if (!pt) {
+        nextActive[idx] = prevActive[idx] ?? false;
+        continue;
+      }
+
+      let wasTouched = false;
+      for (let b = 0; b < beamPositions.length; b++) {
+        const beamPos = beamPositions[b];
+        const dx = pt.x - beamPos.x;
+        const dy = pt.y - beamPos.y;
+        if (dx * dx + dy * dy <= thresholdSq) {
+          wasTouched = true;
+          iconActivationTimeRef.current.set(idx, currentTime);
+          break;
+        }
+      }
+
+      let isActive = wasTouched;
+      if (!wasTouched) {
+        const lastActivation = iconActivationTimeRef.current.get(idx);
+        if (lastActivation && currentTime - lastActivation < ACTIVE_DURATION) {
+          isActive = true;
+        } else if (lastActivation) {
+          iconActivationTimeRef.current.delete(idx);
+        }
+      }
+
+      nextActive[idx] = isActive;
+      if (prevActive[idx] !== isActive) anyChanged = true;
+    }
+
+    if (!anyChanged) return;
+    activeStateRef.current = nextActive;
 
     setIcons((prev) => {
+      let mutated = false;
       const newIcons = prev.map((ic, idx) => {
-        const pt = currentPoints.targets[idx];
-        if (!pt) return ic;
-
-        let isActive = false;
-        let wasTouched = false;
-        
-        // Check if beam is currently touching
-        for (const beamPos of beamPositions) {
-          const dist = Math.hypot(pt.x - beamPos.x, pt.y - beamPos.y);
-          if (dist <= TOUCH_THRESHOLD) {
-            isActive = true;
-            wasTouched = true;
-            iconActivationTimeRef.current.set(idx, currentTime);
-            break;
-          }
-        }
-
-        // If not currently touched, check if still within active duration
-        if (!wasTouched) {
-          const lastActivation = iconActivationTimeRef.current.get(idx);
-          if (lastActivation && currentTime - lastActivation < ACTIVE_DURATION) {
-            isActive = true;
-          } else {
-            iconActivationTimeRef.current.delete(idx);
-          }
-        }
-
-        // Only update if state actually changed
+        const isActive = nextActive[idx];
         if (ic.active === isActive) return ic;
+        mutated = true;
         return { ...ic, active: isActive };
       });
-
-      // Check if anything actually changed
-      const hasChanges = newIcons.some((icon, idx) => icon.active !== prev[idx].active);
-      return hasChanges ? newIcons : prev;
+      return mutated ? newIcons : prev;
     });
   }, [setIcons]);
 
@@ -85,6 +104,28 @@ export const useSolvynAnimation = ({
 
     // Reset start time when points change
     startTimeRef.current = Date.now();
+
+    // Apply the static stroke-dasharray / stroke-dashoffset for the "always
+    // fully lit" beams. These values only depend on the total path length and
+    // therefore never change between frames — writing them every frame was
+    // invalidating the SVG filter cache on the glow paths and forcing the
+    // browser to re-run the feGaussianBlur on every render tick.
+    const applyStaticBeamAttributes = () => {
+      for (let i = 0; i < pathLengthsRef.current.length; i++) {
+        const pathLength = pathLengthsRef.current[i];
+        if (!pathLength) continue;
+        const lenStr = String(pathLength);
+        const beamRef = beamRefs.current[i];
+        if (beamRef.circle) {
+          beamRef.circle.setAttributeNS(null, "stroke-dasharray", lenStr);
+          beamRef.circle.setAttributeNS(null, "stroke-dashoffset", "0");
+        }
+        if (beamRef.core) {
+          beamRef.core.setAttributeNS(null, "stroke-dasharray", lenStr);
+          beamRef.core.setAttributeNS(null, "stroke-dashoffset", "0");
+        }
+      }
+    };
 
     // Measure path lengths when points change
     const measurePathLengths = () => {
@@ -96,27 +137,19 @@ export const useSolvynAnimation = ({
           return 0;
         }
       });
+      applyStaticBeamAttributes();
     };
 
-    // Initial measurement
+    // Initial measurement + one short follow-up in case refs aren't ready
+    // on first run. Previous versions used 4 staggered timers which was
+    // wasteful — a single 200ms follow-up is enough.
     measurePathLengths();
-    
-    // Re-measure multiple times to ensure paths are rendered and positioned correctly
-    const timeoutIds = [
-      setTimeout(measurePathLengths, 100),
-      setTimeout(measurePathLengths, 300),
-      setTimeout(measurePathLengths, 600),
-      setTimeout(measurePathLengths, 1000),
-    ];
+    const timeoutIds = [setTimeout(measurePathLengths, 200)];
 
     let rafId = 0;
 
-    const step = (timestamp: number) => {
-      if (!lastTimestampRef.current) lastTimestampRef.current = timestamp;
-      const dt = (timestamp - lastTimestampRef.current) / 1000;
-      lastTimestampRef.current = timestamp;
-
-      const activePaths = pathRefs.current.filter(Boolean);
+    const step = () => {
+      const activePaths = pathRefs.current;
       if (activePaths.length === 0) {
         rafId = requestAnimationFrame(step);
         return;
@@ -125,46 +158,39 @@ export const useSolvynAnimation = ({
       const currentTime = (Date.now() - (startTimeRef.current || 0)) / 1000;
       const beamPositions: { x: number; y: number }[] = [];
 
-      activePaths.forEach((path, pathIndex) => {
+      for (let pathIndex = 0; pathIndex < activePaths.length; pathIndex++) {
+        const path = activePaths[pathIndex];
+        if (!path) continue;
         try {
-          const pathLength = pathLengthsRef.current[pathIndex] || path.getTotalLength();
-          if (pathLength === 0) return;
+          const pathLength = pathLengthsRef.current[pathIndex];
+          if (!pathLength) continue;
 
-          // Calculate initial delay offset
           const initialDelay = getInitialDelay(pathIndex);
-          const adjustedTime = Math.max(0, currentTime - initialDelay);
+          const adjustedTime = currentTime - initialDelay;
 
-          // Update progress for pulse animation - continuous loop using modulo
+          const beamRef = beamRefs.current[pathIndex];
+          const pulse = beamRef?.pulse;
+
+          if (adjustedTime <= 0) {
+            if (pulse) pulse.setAttributeNS(null, "opacity", "0");
+            continue;
+          }
+
           const distancePerSec = BEAM_SPEED * pathLength;
-          const headDistance = adjustedTime > 0 ? (adjustedTime * distancePerSec) % pathLength : 0;
+          const headDistance = (adjustedTime * distancePerSec) % pathLength;
           progressRefs.current[pathIndex] = headDistance / pathLength;
 
-          // Keep the continuous beam fully lit (fill entire path)
-          const beamRef = beamRefs.current[pathIndex];
-          if (beamRef.circle) {
-            beamRef.circle.setAttributeNS(null, "stroke-dasharray", String(pathLength));
-            beamRef.circle.setAttributeNS(null, "stroke-dashoffset", "0");
-          }
-          if (beamRef.core) {
-            beamRef.core.setAttributeNS(null, "stroke-dasharray", String(pathLength));
-            beamRef.core.setAttributeNS(null, "stroke-dashoffset", "0");
-          }
-
-          // Update pulse position (only show after initial delay)
-          if (beamRef.pulse && points && adjustedTime > 0) {
+          if (pulse) {
             const pulsePoint = path.getPointAtLength(headDistance);
-            beamRef.pulse.setAttributeNS(null, "cx", String(pulsePoint.x));
-            beamRef.pulse.setAttributeNS(null, "cy", String(pulsePoint.y));
-            beamRef.pulse.setAttributeNS(null, "opacity", "1");
+            pulse.setAttributeNS(null, "cx", String(pulsePoint.x));
+            pulse.setAttributeNS(null, "cy", String(pulsePoint.y));
+            pulse.setAttributeNS(null, "opacity", "1");
             beamPositions.push(pulsePoint);
-          } else if (beamRef.pulse) {
-            // Hide pulse before initial delay
-            beamRef.pulse.setAttributeNS(null, "opacity", "0");
           }
         } catch (e) {
           console.error("Error animating beam:", e);
         }
-      });
+      }
 
       checkProximityAndSetActive(beamPositions);
 

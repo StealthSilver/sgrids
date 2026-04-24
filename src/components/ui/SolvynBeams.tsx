@@ -11,7 +11,7 @@ type SolvynBeamsProps = {
   isTablet?: boolean;
 };
 
-export const SolvynBeams: React.FC<SolvynBeamsProps> = ({
+const SolvynBeamsInner: React.FC<SolvynBeamsProps> = ({
   points,
   containerRef,
   pathRefs,
@@ -150,4 +150,10 @@ export const SolvynBeams: React.FC<SolvynBeamsProps> = ({
     </svg>
   );
 };
+
+// Memoize: once the beams mount the only prop that actually changes is
+// `points` (same ref when nothing moved, because the parent already
+// short-circuits in measure()). Previously, every icon-active state flip in
+// the parent would re-render the entire 12-path SVG tree.
+export const SolvynBeams = React.memo(SolvynBeamsInner);
 

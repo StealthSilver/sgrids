@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { IconState, Points } from "../../types/solvynTypes";
@@ -66,6 +66,14 @@ const ICON_POSITIONS_DESKTOP = [
   { top: "85%", right: "3%", delay: 1.8, borderColor: "purple" as const },
 ];
 
+type IconPosition = {
+  top?: string;
+  bottom?: string;
+  left?: string;
+  right?: string;
+  transform?: string;
+};
+
 // Mobile/Tablet positions: Uniformly spaced grid for smaller screens
 // 6 rows evenly spaced with increased gaps: ~5%, ~18%, ~31%, ~44%, ~57%, ~70%, ~83%
 const ICON_POSITIONS_MOBILE = [
@@ -95,28 +103,54 @@ const ICON_POSITIONS_MOBILE = [
   { top: "80%", right: "7%", delay: 1.8, borderColor: "purple" as const },
 ];
 
+// Pre-computed stable-per-layout {position} objects so SolvynIconNode's
+// React.memo comparison doesn't bust on fresh object identity every render.
+const extractPositions = (rows: typeof ICON_POSITIONS_DESKTOP): IconPosition[] =>
+  rows.map(({ delay: _d, borderColor: _b, ...rest }) => rest);
+const POSITIONS_DESKTOP_STABLE = extractPositions(ICON_POSITIONS_DESKTOP);
+const POSITIONS_MOBILE_STABLE = extractPositions(ICON_POSITIONS_MOBILE);
+
 export const Solvyn: React.FC = () => {
   const sectionRef = useRef<HTMLDivElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const sgridsRef = useRef<HTMLDivElement | null>(null);
 
-  // Screen size detection for responsive layout
-  const [isMobile, setIsMobile] = useState(false);
-  const [isTablet, setIsTablet] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  // Screen size detection for responsive layout. Kept in a single state
+  // object so each resize only triggers one React update instead of two.
+  const [screen, setScreen] = useState<{ isMobile: boolean; isTablet: boolean; mounted: boolean }>({
+    isMobile: false,
+    isTablet: false,
+    mounted: false,
+  });
+  const { isMobile, isTablet, mounted } = screen;
 
   useEffect(() => {
-    setMounted(true);
-
-    const checkScreenSize = () => {
+    const compute = () => {
       const width = window.innerWidth;
-      setIsMobile(width < 640); // sm breakpoint
-      setIsTablet(width >= 640 && width < 1024); // md-lg breakpoint
+      const nextMobile = width < 640;
+      const nextTablet = width >= 640 && width < 1024;
+      setScreen((prev) =>
+        prev.isMobile === nextMobile && prev.isTablet === nextTablet && prev.mounted
+          ? prev
+          : { isMobile: nextMobile, isTablet: nextTablet, mounted: true }
+      );
     };
-
-    checkScreenSize();
-    window.addEventListener("resize", checkScreenSize);
-    return () => window.removeEventListener("resize", checkScreenSize);
+    compute();
+    // Throttle resize with rAF so rapid resize events collapse into one
+    // React update per frame.
+    let rafId = 0;
+    const onResize = () => {
+      if (rafId) return;
+      rafId = requestAnimationFrame(() => {
+        rafId = 0;
+        compute();
+      });
+    };
+    window.addEventListener("resize", onResize);
+    return () => {
+      window.removeEventListener("resize", onResize);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
   }, []);
 
   // Create refs for all icons - must be at top level, not in useMemo
@@ -138,6 +172,21 @@ export const Solvyn: React.FC = () => {
 
   // Select positions based on screen size
   const ICON_POSITIONS = isMobile || isTablet ? ICON_POSITIONS_MOBILE : ICON_POSITIONS_DESKTOP;
+  const stablePositions = isMobile || isTablet ? POSITIONS_MOBILE_STABLE : POSITIONS_DESKTOP_STABLE;
+
+  // Memoize the container style so framer-motion doesn't receive a fresh
+  // style object on every render.
+  const containerStyle = useMemo(
+    () => ({
+      height: isMobile ? "100vh" : isTablet ? "100vh" : "90vh",
+      maxHeight: isMobile ? "700px" : isTablet ? "850px" : "900px",
+      minHeight: isMobile ? "600px" : isTablet ? "700px" : "700px",
+    }),
+    [isMobile, isTablet]
+  );
+
+  // Calculate SVG icon size based on screen size
+  const svgIconSize = isMobile ? 16 : isTablet ? 20 : 36;
 
   const pathRefs = useRef<SVGPathElement[]>([]);
   const beamRefs = useRef<{ circle: SVGPathElement | null; core: SVGPathElement | null; pulse: SVGCircleElement | null }[]>(
@@ -250,69 +299,50 @@ export const Solvyn: React.FC = () => {
   useEffect(() => {
     if (!mounted) return;
 
+    // Coalesce measure calls into one per animation frame. Previously every
+    // observer callback and timer triggered its own rAF double-wrap, which
+    // meant 10+ redundant measures piling up during entry animations.
+    let pendingRaf = 0;
     const scheduleMeasure = () => {
-      requestAnimationFrame(() => {
-        requestAnimationFrame(measure);
+      if (pendingRaf) return;
+      pendingRaf = requestAnimationFrame(() => {
+        pendingRaf = 0;
+        measure();
       });
     };
 
     const resizeObserver = new ResizeObserver(scheduleMeasure);
-
-    const observeElements = () => {
-      if (containerRef.current) resizeObserver.observe(containerRef.current);
-      if (sgridsRef.current) resizeObserver.observe(sgridsRef.current);
-      iconRefs.forEach((ref) => {
-        if (ref.current) resizeObserver.observe(ref.current);
-      });
-    };
-
-    observeElements();
+    if (containerRef.current) resizeObserver.observe(containerRef.current);
+    if (sgridsRef.current) resizeObserver.observe(sgridsRef.current);
+    iconRefs.forEach((ref) => {
+      if (ref.current) resizeObserver.observe(ref.current);
+    });
 
     // IntersectionObserver: re-run measurements whenever the section scrolls
-    // into view. The framer-motion `whileInView` entry animations start the
-    // container at scale 0.9, which gives slightly off bounding boxes until
-    // the animation settles. Without this observer, we'd measure too early
-    // and never re-measure once the entry animation completes.
-    let intersectionTimers: ReturnType<typeof setTimeout>[] = [];
+    // into view. The framer-motion entry animations temporarily offset
+    // bounding boxes, and without this we'd measure too early.
     const intersectionObserver = new IntersectionObserver(
       (entries) => {
-        const entry = entries[0];
-        if (entry?.isIntersecting) {
-          intersectionTimers.forEach((t) => clearTimeout(t));
-          intersectionTimers = [
-            setTimeout(scheduleMeasure, 0),
-            setTimeout(scheduleMeasure, 100),
-            setTimeout(scheduleMeasure, 300),
-            setTimeout(scheduleMeasure, 600),
-            setTimeout(scheduleMeasure, 1000),
-            setTimeout(scheduleMeasure, 1500),
-          ];
-        }
+        if (entries[0]?.isIntersecting) scheduleMeasure();
       },
-      { threshold: [0, 0.1, 0.25, 0.5] }
+      { threshold: 0.1 }
     );
-    if (containerRef.current) {
-      intersectionObserver.observe(containerRef.current);
-    }
+    if (containerRef.current) intersectionObserver.observe(containerRef.current);
 
     scheduleMeasure();
 
-    const handleResize = scheduleMeasure;
-    window.addEventListener("resize", handleResize);
-
+    // A handful of sparse fallback measures during the first ~1s covers the
+    // period when framer-motion entry animations are still running.
     const timers = [
-      setTimeout(scheduleMeasure, 50),
       setTimeout(scheduleMeasure, 150),
-      setTimeout(scheduleMeasure, 400),
-      setTimeout(scheduleMeasure, 800),
-      setTimeout(scheduleMeasure, 1500),
+      setTimeout(scheduleMeasure, 500),
+      setTimeout(scheduleMeasure, 1200),
     ];
 
     return () => {
       resizeObserver.disconnect();
       intersectionObserver.disconnect();
-      intersectionTimers.forEach((t) => clearTimeout(t));
-      window.removeEventListener("resize", handleResize);
+      if (pendingRaf) cancelAnimationFrame(pendingRaf);
       timers.forEach((t) => clearTimeout(t));
     };
   }, [measure, isMobile, isTablet, mounted, iconRefs]);
@@ -439,11 +469,7 @@ export const Solvyn: React.FC = () => {
               viewport={{ once: true }}
               onAnimationComplete={handleEntryAnimationComplete}
               className="relative flex items-center justify-center w-full"
-              style={{ 
-                height: isMobile ? "100vh" : isTablet ? "100vh" : "90vh", 
-                maxHeight: isMobile ? "700px" : isTablet ? "850px" : "900px",
-                minHeight: isMobile ? "600px" : isTablet ? "700px" : "700px"
-              }}
+              style={containerStyle}
           >
             {/* Center SGrids Logo */}
               <motion.div 
@@ -489,22 +515,16 @@ export const Solvyn: React.FC = () => {
               {icons.map((icon, idx) => {
                 const config = ICON_CONFIG[idx];
                 const positionData = ICON_POSITIONS[idx];
-                const IconComponent = config.component;
-                
-                // Extract only positioning properties for the position prop
-                const { delay, borderColor, ...position } = positionData;
-                
-                // Calculate SVG icon size based on screen size
-                const svgIconSize = isMobile ? 16 : isTablet ? 20 : 36;
 
                 return (
                   <SolvynIconNode
                     key={icon.id}
                     icon={icon}
-                    iconComponent={<IconComponent active={icon.active} size={svgIconSize} />}
-                    position={position}
-                    animationDelay={delay}
-                    borderColor={borderColor}
+                    IconComponent={config.component}
+                    svgIconSize={svgIconSize}
+                    position={stablePositions[idx]}
+                    animationDelay={positionData.delay}
+                    borderColor={positionData.borderColor}
                     isMobile={isMobile}
                     isTablet={isTablet}
                     onEntryComplete={handleEntryAnimationComplete}

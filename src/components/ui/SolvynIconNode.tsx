@@ -2,9 +2,12 @@ import React from "react";
 import { motion } from "framer-motion";
 import { IconState } from "../../types/solvynTypes";
 
+type IconComponentType = React.ComponentType<{ active: boolean; size?: number }>;
+
 type SolvynIconNodeProps = {
   icon: IconState;
-  iconComponent: React.ReactNode;
+  IconComponent: IconComponentType;
+  svgIconSize: number;
   position: {
     top?: string;
     bottom?: string;
@@ -19,9 +22,10 @@ type SolvynIconNodeProps = {
   onEntryComplete?: () => void;
 };
 
-export const SolvynIconNode: React.FC<SolvynIconNodeProps> = ({
+const SolvynIconNodeInner: React.FC<SolvynIconNodeProps> = ({
   icon,
-  iconComponent,
+  IconComponent,
+  svgIconSize,
   position,
   animationDelay,
   borderColor = "orange",
@@ -42,7 +46,6 @@ export const SolvynIconNode: React.FC<SolvynIconNodeProps> = ({
   // Responsive sizing
   const iconPadding = isMobile ? "p-1.5" : isTablet ? "p-2" : "p-2.5";
   const iconSize = isMobile ? "w-4 h-4" : isTablet ? "w-5 h-5" : "w-9 h-9";
-  // Smaller label sizes
   const labelSize = isMobile ? "text-[10px]" : isTablet ? "text-[10px] sm:text-[11px]" : "text-[11px]";
   const labelMaxWidth = isMobile ? "max-w-[120px]" : isTablet ? "max-w-[120px]" : "max-w-[100px]";
   const gapSize = isMobile ? "gap-1.5" : isTablet ? "gap-2" : "gap-2.5";
@@ -67,7 +70,7 @@ export const SolvynIconNode: React.FC<SolvynIconNodeProps> = ({
         }`}
       >
         <div className={`${iconSize} flex items-center justify-center`}>
-          {iconComponent}
+          <IconComponent active={isActive} size={svgIconSize} />
         </div>
       </div>
       <span className={`${labelSize} font-semibold text-center text-gray-900 dark:text-gray-100 ${labelMaxWidth} leading-tight px-1.5 sm:px-2 py-0.5 whitespace-normal break-words bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-md shadow-sm`}>
@@ -77,3 +80,9 @@ export const SolvynIconNode: React.FC<SolvynIconNodeProps> = ({
   );
 };
 
+// Memoized: the parent re-creates the icons array on every active-state
+// change, but the individual icon objects keep reference equality unless
+// their own active flag flipped. Combined with stable IconComponent refs,
+// React.memo with default shallow comparison means only the single node
+// whose `active` actually changed will re-render.
+export const SolvynIconNode = React.memo(SolvynIconNodeInner);
