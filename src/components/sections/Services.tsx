@@ -84,9 +84,11 @@ export const Services = () => {
     // Ensure center element is visible and has dimensions
     if (centerRect.width === 0 || centerRect.height === 0) return;
 
+    // Origin: bottom-center of the sgrids logo so the beams emanate from the
+    // bottom edge of the logo rather than from inside it.
     const origin = {
       x: centerRect.left + centerRect.width / 2 - containerRect.left,
-      y: centerRect.top + centerRect.height / 2 - containerRect.top,
+      y: centerRect.bottom - containerRect.top,
     };
 
     const targets: { x: number; y: number }[] = [];
@@ -138,11 +140,13 @@ export const Services = () => {
   useEffect(() => {
     if (!mounted) return;
 
-    const resizeObserver = new ResizeObserver(() => {
+    const scheduleMeasure = () => {
       requestAnimationFrame(() => {
         requestAnimationFrame(measure);
       });
-    });
+    };
+
+    const resizeObserver = new ResizeObserver(scheduleMeasure);
 
     const observeElements = () => {
       if (containerRef.current) {
@@ -151,7 +155,7 @@ export const Services = () => {
       if (centerRef.current) {
         resizeObserver.observe(centerRef.current);
       }
-      [bessRef, solarRef, windRef, hydrogenRef].forEach(ref => {
+      [bessRef, solarRef, windRef, hydrogenRef].forEach((ref) => {
         if (ref.current) {
           resizeObserver.observe(ref.current);
         }
@@ -160,47 +164,66 @@ export const Services = () => {
 
     observeElements();
 
-    const observeTimers = [
-      setTimeout(() => observeElements(), 100),
-      setTimeout(() => observeElements(), 300),
-      setTimeout(() => observeElements(), 600),
-    ];
+    // IntersectionObserver: re-run measurements whenever the section scrolls
+    // into view. This is the key fix for the "animation only works after a
+    // refresh" bug — the framer-motion `whileInView` entry animations start
+    // the icons/logo at scale 0, which gives them a 0×0 bounding box. Without
+    // this observer, we'd measure too early (when everything is collapsed)
+    // and never re-measure once the entry animation completes.
+    let intersectionTimers: ReturnType<typeof setTimeout>[] = [];
+    const intersectionObserver = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (entry?.isIntersecting) {
+          intersectionTimers.forEach((t) => clearTimeout(t));
+          intersectionTimers = [
+            setTimeout(scheduleMeasure, 0),
+            setTimeout(scheduleMeasure, 100),
+            setTimeout(scheduleMeasure, 300),
+            setTimeout(scheduleMeasure, 600),
+            setTimeout(scheduleMeasure, 1000),
+            setTimeout(scheduleMeasure, 1500),
+          ];
+        }
+      },
+      { threshold: [0, 0.1, 0.25, 0.5] }
+    );
+    if (containerRef.current) {
+      intersectionObserver.observe(containerRef.current);
+    }
 
-    // Measure immediately and multiple times to ensure we get valid measurements
-    requestAnimationFrame(() => {
-      requestAnimationFrame(measure);
-    });
+    scheduleMeasure();
 
-    const handleResize = () => {
-      requestAnimationFrame(() => {
-        requestAnimationFrame(measure);
-      });
-    };
+    const handleResize = scheduleMeasure;
     window.addEventListener("resize", handleResize);
-    
-    // Multiple measurement attempts with increasing delays
+
     const timers = [
-      setTimeout(() => requestAnimationFrame(() => requestAnimationFrame(measure)), 0),
-      setTimeout(() => requestAnimationFrame(() => requestAnimationFrame(measure)), 50),
-      setTimeout(() => requestAnimationFrame(() => requestAnimationFrame(measure)), 150),
-      setTimeout(() => requestAnimationFrame(() => requestAnimationFrame(measure)), 300),
-      setTimeout(() => requestAnimationFrame(() => requestAnimationFrame(measure)), 500),
-      setTimeout(() => requestAnimationFrame(() => requestAnimationFrame(measure)), 800),
-      setTimeout(() => requestAnimationFrame(() => requestAnimationFrame(measure)), 1200),
+      setTimeout(scheduleMeasure, 50),
+      setTimeout(scheduleMeasure, 150),
+      setTimeout(scheduleMeasure, 400),
+      setTimeout(scheduleMeasure, 800),
+      setTimeout(scheduleMeasure, 1500),
     ];
-    
-    const animationTimer = setTimeout(() => {
-      requestAnimationFrame(() => requestAnimationFrame(measure));
-    }, 2000);
-    
+
     return () => {
-      observeTimers.forEach(timer => clearTimeout(timer));
       resizeObserver.disconnect();
+      intersectionObserver.disconnect();
+      intersectionTimers.forEach((t) => clearTimeout(t));
       window.removeEventListener("resize", handleResize);
-      timers.forEach(timer => clearTimeout(timer));
-      clearTimeout(animationTimer);
+      timers.forEach((timer) => clearTimeout(timer));
     };
   }, [measure, isMobile, isTablet, mounted]);
+
+  // Trigger a fresh measurement after any of the entry animations complete
+  // (center logo scaling from 0 → 1, or the energy icons sliding up). Without
+  // this, we rely on setTimeouts racing the animation, which is what caused
+  // the "animation only works on refresh" bug.
+  const handleEntryAnimationComplete = useCallback(() => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(measure);
+      setTimeout(measure, 100);
+    });
+  }, [measure]);
 
   // Animation hook
   useServicesAnimation({
@@ -307,6 +330,7 @@ export const Services = () => {
         whileInView={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.8, delay: 0.4 }}
         viewport={{ once: true }}
+        onAnimationComplete={handleEntryAnimationComplete}
         className="max-w-6xl mx-auto"
       >
         <div
@@ -325,6 +349,7 @@ export const Services = () => {
               bounce: 0.4,
             }}
             viewport={{ once: true }}
+            onAnimationComplete={handleEntryAnimationComplete}
             className="absolute top-12 sm:top-16 md:top-20 left-1/2 -translate-x-1/2 z-20"
           >
             <div className="relative w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 rounded-2xl sm:rounded-3xl bg-gradient-to-br from-orange-500 via-purple-600 to-orange-500 p-[2px] shadow-2xl hover:shadow-orange-500/30 dark:hover:shadow-orange-500/50 transition-all duration-500 hover:scale-110 group">
@@ -356,6 +381,7 @@ export const Services = () => {
                     bounce: 0.4,
                   }}
                   viewport={{ once: true }}
+                  onAnimationComplete={handleEntryAnimationComplete}
                   className="flex flex-col items-center group cursor-pointer"
                 >
                   <div className={`relative w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 rounded-xl sm:rounded-2xl p-[2px] shadow-md transition-all duration-500 group-hover:scale-110 ${
@@ -385,7 +411,7 @@ export const Services = () => {
                         alt={service.title}
                         width={60}
                         height={60}
-                        onLoadingComplete={() => {
+                        onLoad={() => {
                           requestAnimationFrame(() => {
                             requestAnimationFrame(() => {
                               setTimeout(() => measure(), 50);
