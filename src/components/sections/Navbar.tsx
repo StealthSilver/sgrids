@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Menu, X, Github } from "lucide-react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { ThemeToggle } from "../ui/ThemeToggle";
 import { ShimmerButton } from "../ui/ShimmerButton";
 
@@ -170,55 +170,121 @@ export default function Navbar() {
           <button
             onClick={toggleMenu}
             aria-label={isOpen ? "Close menu" : "Open menu"}
-            className="p-1.5 rounded-md"
+            className="p-1.5 rounded-md relative h-9 w-9 flex items-center justify-center text-gray-900 dark:text-gray-100"
           >
-            {isOpen ? <X size={24} /> : <Menu size={24} />}
+            <AnimatePresence mode="wait" initial={false}>
+              {isOpen ? (
+                <motion.span
+                  key="close"
+                  initial={{ opacity: 0, scale: 0.85, rotate: -90 }}
+                  animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                  exit={{ opacity: 0, scale: 0.85, rotate: 90 }}
+                  transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
+                  className="absolute inset-0 flex items-center justify-center"
+                >
+                  <X size={24} strokeWidth={2} />
+                </motion.span>
+              ) : (
+                <motion.span
+                  key="open"
+                  initial={{ opacity: 0, scale: 0.85, rotate: 90 }}
+                  animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                  exit={{ opacity: 0, scale: 0.85, rotate: -90 }}
+                  transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
+                  className="absolute inset-0 flex items-center justify-center"
+                >
+                  <Menu size={24} strokeWidth={2} />
+                </motion.span>
+              )}
+            </AnimatePresence>
           </button>
         </div>
       </div>
 
-      {/* Mobile/Tablet Nav */}
-      {isOpen && (
-        <div className="lg:hidden absolute top-full left-0 right-0 bg-white/95 dark:bg-black/95 backdrop-blur-md shadow-lg border-t border-gray-200 dark:border-gray-700 transition-colors duration-300 z-50">
-          <div className="flex flex-col items-center space-y-3 sm:space-y-4 py-6 sm:py-8">
-            {navItems.map((item) =>
-              item.external ? (
-                <a
-                  key={item.name}
-                  href={item.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="transition-colors text-sm text-gray-700 hover:text-black dark:text-gray-300 dark:hover:text-white"
-                  onClick={() => setIsOpen(false)}
+      {/* Mobile/Tablet Nav — height + opacity for smooth open/close */}
+      <AnimatePresence initial={false}>
+        {isOpen && (
+          <motion.div
+            className="lg:hidden absolute top-full left-0 right-0 z-50 overflow-hidden"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.32, ease: [0.4, 0, 0.2, 1] }}
+          >
+            <div className="bg-white/95 dark:bg-black/95 backdrop-blur-md shadow-lg border-t border-gray-200 dark:border-gray-700 transition-colors duration-300">
+              <motion.div
+                className="flex flex-col items-center space-y-3 sm:space-y-4 py-6 sm:py-8"
+                initial={{ y: -8 }}
+                animate={{ y: 0 }}
+                transition={{ duration: 0.28, ease: [0.4, 0, 0.2, 1] }}
+              >
+                {navItems.map((item, index) =>
+                  item.external ? (
+                    <motion.a
+                      key={item.name}
+                      href={item.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="transition-colors text-sm font-sans font-semibold text-gray-700 hover:text-black dark:text-gray-300 dark:hover:text-white"
+                      onClick={() => setIsOpen(false)}
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{
+                        delay: 0.04 + index * 0.035,
+                        duration: 0.25,
+                        ease: [0.4, 0, 0.2, 1],
+                      }}
+                    >
+                      {item.name}
+                    </motion.a>
+                  ) : (
+                    <motion.div
+                      key={item.name}
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{
+                        delay: 0.04 + index * 0.035,
+                        duration: 0.25,
+                        ease: [0.4, 0, 0.2, 1],
+                      }}
+                    >
+                      <Link
+                        href={item.href}
+                        className="transition-colors text-sm font-sans font-semibold text-gray-700 hover:text-black dark:text-gray-300 dark:hover:text-white"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        {item.name}
+                      </Link>
+                    </motion.div>
+                  )
+                )}
+                <motion.div
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{
+                    delay: 0.04 + navItems.length * 0.035,
+                    duration: 0.25,
+                    ease: [0.4, 0, 0.2, 1],
+                  }}
                 >
-                  {item.name}
-                </a>
-              ) : (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className="transition-colors text-sm text-gray-700 hover:text-black dark:text-gray-300 dark:hover:text-white"
-                  onClick={() => setIsOpen(false)}
-                >
-                  {item.name}
-                </Link>
-              )
-            )}
-            <ShimmerButton
-              onClick={() => {
-                setIsOpen(false);
-                const footer = document.getElementById("footer");
-                footer?.scrollIntoView({ behavior: "smooth" });
-              }}
-              className="font-sans font-bold text-white text-sm px-6 py-2.5 mt-2"
-              background="#FF7217"
-              shimmerColor="#ffffff"
-            >
-              CONNECT NOW
-            </ShimmerButton>
-          </div>
-        </div>
-      )}
+                  <ShimmerButton
+                    onClick={() => {
+                      setIsOpen(false);
+                      const footer = document.getElementById("footer");
+                      footer?.scrollIntoView({ behavior: "smooth" });
+                    }}
+                    className="font-sans font-bold text-white text-sm px-6 py-2.5 mt-2"
+                    background="#FF7217"
+                    shimmerColor="#ffffff"
+                  >
+                    CONNECT NOW
+                  </ShimmerButton>
+                </motion.div>
+              </motion.div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </nav>
   );
 }

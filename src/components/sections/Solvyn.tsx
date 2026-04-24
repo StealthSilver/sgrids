@@ -388,56 +388,56 @@ export const Solvyn: React.FC = () => {
           </motion.div>
 
           {/* Centered Text Content */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: -30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
-            className="space-y-6 text-center max-w-4xl"
+            className="space-y-4 sm:space-y-5 md:space-y-6 text-center max-w-4xl font-sans"
           >
-            <motion.h2 
+            <motion.h2
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
               viewport={{ once: true }}
-              className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 leading-tight"
+              className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-medium leading-tight text-gray-900 dark:text-white tracking-tight"
             >
               Innovation With Purpose
             </motion.h2>
-            
-            <motion.p 
+
+            <motion.p
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
               viewport={{ once: true }}
-              className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed"
+              className="text-sm sm:text-base lg:text-lg leading-relaxed text-gray-600 dark:text-gray-300"
             >
               Innovation is our engine, purpose is our compass, and experience is the ground we stand on.
             </motion.p>
-            
-            <motion.p 
+
+            <motion.p
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
               viewport={{ once: true }}
-              className="text-base text-gray-600 dark:text-gray-400 leading-relaxed"
+              className="text-sm sm:text-base lg:text-lg leading-relaxed text-gray-600 dark:text-gray-300"
             >
               <span className="font-semibold text-orange-600 dark:text-orange-400">Solvyn</span> was built
               for the complexity of renewable energy — to turn scattered data into unified intelligence
               across every layer of operations, from the control room to the boardroom.
             </motion.p>
-            
+
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
               viewport={{ once: true }}
-              className="text-base text-gray-600 dark:text-gray-400 leading-relaxed"
+              className="text-sm sm:text-base lg:text-lg leading-relaxed text-gray-600 dark:text-gray-300"
             >
               More than a platform, Solvyn is a new way of running energy: a secure, AI-driven system that
               unifies <span className="font-semibold">SCADA</span>, <span className="font-semibold">EMS</span>
               , <span className="font-semibold">PPC</span>, <span className="font-semibold">EPM</span>, and{" "}
-              <span className="font-semibold">Intelligent Bidding (IB)</span>. It's designed for{" "}
+              <span className="font-semibold">Intelligent Bidding (IB)</span>. It&apos;s designed for{" "}
               <span className="font-semibold text-gray-800 dark:text-gray-200">solar</span>,{" "}
               <span className="font-semibold text-gray-800 dark:text-gray-200">wind</span>,{" "}
               <span className="font-semibold text-gray-800 dark:text-gray-200">BESS</span>,{" "}
@@ -446,18 +446,18 @@ export const Solvyn: React.FC = () => {
               built to serve those who carry the responsibility of the transition — operators seeking
               reliability, investors seeking returns, and governments driving national clean energy goals.
             </motion.p>
-            
-            <motion.p 
+
+            <motion.p
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
               viewport={{ once: true }}
-              className="text-lg font-semibold text-gray-900 dark:text-gray-100 leading-relaxed"
+              className="text-sm sm:text-base lg:text-lg leading-relaxed font-medium text-gray-900 dark:text-gray-100"
             >
               Where others give you fragments, Solvyn gives you the whole picture — automation that scales,
-              compliance that's built in, and intelligence that's always one step ahead.
+              compliance that&apos;s built in, and intelligence that&apos;s always one step ahead.
             </motion.p>
-            </motion.div>
+          </motion.div>
 
           {/* Centered Animation Container */}
           <div className="w-full max-w-5xl">
