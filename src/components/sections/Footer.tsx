@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { FaXTwitter } from "react-icons/fa6";
 
 export const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -70,13 +71,11 @@ export const Footer = () => {
       ),
     },
     {
-      name: "Twitter",
+      name: "X",
       href: "https://x.com/smartgrids",
       target: "_blank",
       icon: (
-        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z" />
-        </svg>
+        <FaXTwitter className="w-6 h-6" />
       ),
     },
   ];

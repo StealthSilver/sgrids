@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import { ShimmerButton } from "../ui/ShimmerButton";
 import { LazyGlobe } from "../ui/LazyGlobe";
@@ -305,31 +304,23 @@ const getGlobeConfig = (isDark: boolean) => ({
 });
 
 export default function Hero() {
-  const { theme, resolvedTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
   const [globeConfig, setGlobeConfig] = useState(getGlobeConfig(false));
   const [globeKey, setGlobeKey] = useState(0);
 
+  // The `.dark` class on <html> is the single source of truth for the theme.
+  // Reading it directly (and watching for changes) avoids stale values from
+  // next-themes when the ThemeToggle runs on a different route and then the
+  // user navigates back to the home page.
   useEffect(() => {
-    setMounted(true);
-    // Set initial theme on mount
-    const isDark = document.documentElement.classList.contains("dark");
-    setIsDarkMode(isDark);
-    setGlobeConfig(getGlobeConfig(isDark));
-
-    // Watch for class changes on document element
-    const observer = new MutationObserver(() => {
+    const applyThemeFromDom = () => {
       const isDark = document.documentElement.classList.contains("dark");
-      console.log(
-        "Theme changed via MutationObserver:",
-        isDark ? "dark" : "light"
-      );
-      setIsDarkMode(isDark);
       setGlobeConfig(getGlobeConfig(isDark));
-      setGlobeKey((prev) => prev + 1); // Force re-render
-    });
+      setGlobeKey((prev) => prev + 1);
+    };
 
+    applyThemeFromDom();
+
+    const observer = new MutationObserver(applyThemeFromDom);
     observer.observe(document.documentElement, {
       attributes: true,
       attributeFilter: ["class"],
@@ -337,20 +328,6 @@ export default function Hero() {
 
     return () => observer.disconnect();
   }, []);
-
-  useEffect(() => {
-    if (mounted) {
-      // Additional update based on theme prop changes
-      const isDark =
-        resolvedTheme === "dark" ||
-        theme === "dark" ||
-        document.documentElement.classList.contains("dark");
-      console.log("Theme changed via useEffect:", isDark ? "dark" : "light");
-      setIsDarkMode(isDark);
-      setGlobeConfig(getGlobeConfig(isDark));
-      setGlobeKey((prev) => prev + 1); // Force re-render
-    }
-  }, [theme, resolvedTheme, mounted]);
 
   const dataPoints = [
     { value: 400, suffix: "+", label: "PROJECTS SUCCESSFULLY COMPLETED" },

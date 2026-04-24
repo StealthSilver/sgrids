@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Moon, Sun } from "lucide-react";
 import { flushSync } from "react-dom";
+import { useTheme } from "next-themes";
 
 import { cn } from "@/lib/utils";
 
@@ -16,6 +17,7 @@ export const ThemeToggle = ({
   duration = 400,
   ...props
 }: AnimatedThemeTogglerProps) => {
+  const { setTheme, resolvedTheme } = useTheme();
   const [isDark, setIsDark] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
@@ -35,18 +37,8 @@ export const ThemeToggle = ({
     return () => observer.disconnect();
   }, []);
 
-  const toggleTheme = useCallback(async () => {
+  const applyViewTransitionAnimation = useCallback(() => {
     if (!buttonRef.current) return;
-
-    await document.startViewTransition(() => {
-      flushSync(() => {
-        const newTheme = !isDark;
-        setIsDark(newTheme);
-        document.documentElement.classList.toggle("dark");
-        localStorage.setItem("theme", newTheme ? "dark" : "light");
-      });
-    }).ready;
-
     const { top, left, width, height } =
       buttonRef.current.getBoundingClientRect();
     const x = left + width / 2;
@@ -69,7 +61,40 @@ export const ThemeToggle = ({
         pseudoElement: "::view-transition-new(root)",
       }
     );
-  }, [isDark, duration]);
+  }, [duration]);
+
+  const toggleTheme = useCallback(async () => {
+    if (!buttonRef.current) return;
+
+    const currentlyDark =
+      document.documentElement.classList.contains("dark");
+    const nextTheme = currentlyDark ? "light" : "dark";
+
+    const commitTheme = () => {
+      flushSync(() => {
+        setIsDark(!currentlyDark);
+        // Update both next-themes state and the DOM class synchronously so
+        // the rest of the app (e.g. globe config driven by useTheme()) stays
+        // in sync across route transitions.
+        setTheme(nextTheme);
+        if (nextTheme === "dark") {
+          document.documentElement.classList.add("dark");
+        } else {
+          document.documentElement.classList.remove("dark");
+        }
+      });
+    };
+
+    // Some browsers (Safari/Firefox) don't support View Transitions. Fall back
+    // to a plain theme switch in that case.
+    if (typeof document.startViewTransition !== "function") {
+      commitTheme();
+      return;
+    }
+
+    await document.startViewTransition(commitTheme).ready;
+    applyViewTransitionAnimation();
+  }, [setTheme, applyViewTransitionAnimation]);
 
   return (
     <button
