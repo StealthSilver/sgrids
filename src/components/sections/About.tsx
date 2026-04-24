@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef } from "react";
+import React from "react";
 import { motion } from "framer-motion";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
@@ -9,8 +9,6 @@ export const About = () => {
   const { theme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const heroRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -40,185 +38,20 @@ export const About = () => {
     }
   }, [theme, resolvedTheme, mounted]);
 
-  // Particle effect behind the about image
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    const host = heroRef.current;
-    if (!canvas || !host) return;
-
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    let width = 0;
-    let height = 0;
-    let dpr = Math.max(1, window.devicePixelRatio || 1);
-    let rafId = 0;
-
-    type Particle = {
-      x: number;
-      y: number;
-      vx: number;
-      vy: number;
-      r: number;
-      color: string;
-      life: number;
-      maxLife: number;
-    };
-
-    const palette = [
-      "rgba(255, 122, 24, ALPHA)",
-      "rgba(255, 165, 77, ALPHA)",
-      "rgba(168, 85, 247, ALPHA)",
-      "rgba(139, 92, 246, ALPHA)",
-    ];
-
-    let particles: Particle[] = [];
-
-    const spawn = (count: number) => {
-      for (let i = 0; i < count; i++) {
-        const maxLife = 240 + Math.random() * 360;
-        const color = palette[Math.floor(Math.random() * palette.length)];
-        particles.push({
-          x: Math.random() * width,
-          y: Math.random() * height,
-          vx: (Math.random() - 0.5) * 0.25,
-          vy: -(0.08 + Math.random() * 0.35),
-          r: 0.6 + Math.random() * 1.6,
-          color,
-          life: Math.random() * maxLife,
-          maxLife,
-        });
-      }
-    };
-
-    const resize = () => {
-      const rect = host.getBoundingClientRect();
-      width = rect.width;
-      height = rect.height;
-      dpr = Math.max(1, window.devicePixelRatio || 1);
-      canvas.width = Math.floor(width * dpr);
-      canvas.height = Math.floor(height * dpr);
-      canvas.style.width = `${width}px`;
-      canvas.style.height = `${height}px`;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-      const target = Math.min(
-        140,
-        Math.max(60, Math.floor((width * height) / 14000))
-      );
-      particles = [];
-      spawn(target);
-    };
-
-    resize();
-    const ro = new ResizeObserver(resize);
-    ro.observe(host);
-
-    const draw = () => {
-      ctx.clearRect(0, 0, width, height);
-
-      // Soft connecting lines between nearby particles
-      const maxDist = 90;
-      const lineAlphaBase = isDarkMode ? 0.08 : 0.06;
-      for (let i = 0; i < particles.length; i++) {
-        for (let j = i + 1; j < particles.length; j++) {
-          const a = particles[i];
-          const b = particles[j];
-          const dx = a.x - b.x;
-          const dy = a.y - b.y;
-          const d2 = dx * dx + dy * dy;
-          if (d2 < maxDist * maxDist) {
-            const d = Math.sqrt(d2);
-            const alpha = (1 - d / maxDist) * lineAlphaBase;
-            ctx.strokeStyle = `rgba(255, 122, 24, ${alpha})`;
-            ctx.lineWidth = 0.6;
-            ctx.beginPath();
-            ctx.moveTo(a.x, a.y);
-            ctx.lineTo(b.x, b.y);
-            ctx.stroke();
-          }
-        }
-      }
-
-      for (const p of particles) {
-        p.life += 1;
-        p.x += p.vx;
-        p.y += p.vy;
-
-        // Respawn on exit or end of life
-        if (
-          p.life > p.maxLife ||
-          p.y < -10 ||
-          p.x < -10 ||
-          p.x > width + 10
-        ) {
-          p.x = Math.random() * width;
-          p.y = height + 10;
-          p.vx = (Math.random() - 0.5) * 0.25;
-          p.vy = -(0.08 + Math.random() * 0.35);
-          p.r = 0.6 + Math.random() * 1.6;
-          p.color = palette[Math.floor(Math.random() * palette.length)];
-          p.life = 0;
-          p.maxLife = 240 + Math.random() * 360;
-        }
-
-        // Fade in/out across life
-        const t = p.life / p.maxLife;
-        const fade =
-          t < 0.15 ? t / 0.15 : t > 0.85 ? (1 - t) / 0.15 : 1;
-        const alpha = (isDarkMode ? 0.75 : 0.55) * fade;
-
-        ctx.beginPath();
-        ctx.fillStyle = p.color.replace("ALPHA", alpha.toFixed(3));
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Soft glow
-        ctx.beginPath();
-        ctx.fillStyle = p.color.replace(
-          "ALPHA",
-          (alpha * 0.25).toFixed(3)
-        );
-        ctx.arc(p.x, p.y, p.r * 3, 0, Math.PI * 2);
-        ctx.fill();
-      }
-
-      rafId = requestAnimationFrame(draw);
-    };
-
-    rafId = requestAnimationFrame(draw);
-
-    return () => {
-      cancelAnimationFrame(rafId);
-      ro.disconnect();
-    };
-  }, [isDarkMode, mounted]);
-
   return (
     <section
       id="about"
       className="relative w-full px-4 sm:px-6 pt-6 sm:pt-10 bg-white/70 dark:bg-black/70 backdrop-blur-md overflow-hidden"
     >
       <div className="max-w-7xl mx-auto">
-        {/* Unified Hero: label + centered diffused image with particles and overlaid text */}
+        {/* Unified Hero: label + centered diffused image and overlaid text */}
         <motion.div
-          ref={heroRef}
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
           viewport={{ once: true }}
           className="relative mx-auto w-full max-w-5xl min-h-[520px] sm:min-h-[600px] lg:min-h-[680px] flex items-center justify-center overflow-hidden rounded-2xl sm:rounded-3xl bg-transparent dark:bg-black/50 mb-8 sm:mb-12 lg:mb-16"
         >
-          {/* Radial gradient glow behind everything */}
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0"
-            style={{
-              background:
-                "radial-gradient(60% 55% at 50% 50%, rgba(255,122,24,0.18) 0%, rgba(168,85,247,0.14) 35%, rgba(0,0,0,0) 75%)",
-            }}
-          />
-
           {/* Diffused, center-aligned about image */}
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
             <img
@@ -226,7 +59,7 @@ export const About = () => {
               alt="About Smart Grid Analytics"
               className="w-[90%] sm:w-[70%] md:w-[55%] lg:w-[48%] max-w-[520px] object-contain select-none"
               style={{
-                opacity: isDarkMode ? 0.5 : 0.42,
+                opacity: isDarkMode ? 0.5 : 0.70,
                 filter: `blur(6px) saturate(1.1) ${
                   isDarkMode ? "brightness(1.1)" : "brightness(1.05)"
                 }`,
@@ -237,13 +70,6 @@ export const About = () => {
               }}
             />
           </div>
-
-          {/* Particle canvas */}
-          <canvas
-            ref={canvasRef}
-            aria-hidden
-            className="pointer-events-none absolute inset-0 h-full w-full"
-          />
 
           {/* Vignette for text readability (dark mode only) */}
           <div
