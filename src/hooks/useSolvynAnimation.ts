@@ -7,6 +7,8 @@ type UseSolvynAnimationProps = {
   beamRefs: React.MutableRefObject<{ circle: SVGPathElement | null; core: SVGPathElement | null; pulse: SVGCircleElement | null }[]>;
   progressRefs: React.MutableRefObject<number[]>;
   setIcons: React.Dispatch<React.SetStateAction<IconState[]>>;
+  /** When false, the beam RAF loop does not run (waits for images/fonts/layout). */
+  enabled?: boolean;
 };
 
 // Staggered delays: top row (0,1) together, then 2-11 one by one
@@ -22,6 +24,7 @@ export const useSolvynAnimation = ({
   beamRefs,
   progressRefs,
   setIcons,
+  enabled = true,
 }: UseSolvynAnimationProps) => {
   const lastTimestampRef = useRef<number | null>(null);
   const pointsRef = useRef<Points | null>(points);
@@ -100,7 +103,7 @@ export const useSolvynAnimation = ({
   }, [setIcons]);
 
   useEffect(() => {
-    if (!points || points.targets.length < 12) return;
+    if (!enabled || !points || points.targets.length < 12) return;
 
     // Reset start time when points change
     startTimeRef.current = Date.now();
@@ -203,5 +206,5 @@ export const useSolvynAnimation = ({
       timeoutIds.forEach(id => clearTimeout(id));
       lastTimestampRef.current = null;
     };
-  }, [points, pathRefs, beamRefs, progressRefs, checkProximityAndSetActive]);
+  }, [enabled, points, pathRefs, beamRefs, progressRefs, checkProximityAndSetActive]);
 };

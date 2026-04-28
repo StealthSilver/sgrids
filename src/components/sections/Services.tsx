@@ -7,6 +7,8 @@ import { useServicesAnimation } from "../../hooks/useServicesAnimation";
 import { Points } from "../../types/solvynTypes";
 import Image from "next/image";
 import { useTheme } from "next-themes";
+import { reveal, revealScale } from "@/lib/scrollReveal";
+import { useDiagramAnimationReady } from "@/lib/useDiagramAnimationReady";
 
 // Import icons for features
 import stackIcon from "@/app/Icons/stack.svg";
@@ -35,6 +37,11 @@ export const Services = () => {
   const [isTablet, setIsTablet] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [points, setPoints] = useState<Points | null>(null);
+
+  const { animationReady: beamAnimationReady, markDiagramImageLoaded } = useDiagramAnimationReady(
+    mounted,
+    5
+  );
 
   useEffect(() => {
     setMounted(true);
@@ -232,6 +239,7 @@ export const Services = () => {
     beamRefs,
     progressRefs,
     setIconActive: handleIconActive,
+    enabled: beamAnimationReady,
   });
 
   const energyServices = [
@@ -302,10 +310,7 @@ export const Services = () => {
       {/* ====== TITLE ====== */}
       <div className="max-w-7xl mx-auto mb-2 sm:mb-8 md:mb-12">
       <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
+          {...reveal({ transition: { duration: 0.9 } })}
           className="mb-0 sm:mb-6 md:mb-8 lg:mb-16"
         >
           <p className="text-center text-gray-500 dark:text-gray-500 text-xs sm:text-sm font-semibold uppercase tracking-wider mb-2 sm:mb-4 md:mb-6 lg:mb-8 font-sans">
@@ -314,10 +319,7 @@ export const Services = () => {
         </motion.div>
 
         <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          viewport={{ once: true }}
+          {...reveal({ offset: 18, transition: { duration: 0.9, delay: 0.2 } })}
           className="text-center text-gray-600 dark:text-gray-400 text-sm sm:text-base md:text-lg font-sans leading-relaxed max-w-3xl mx-auto px-4"
         >
           Comprehensive energy solutions powered by cutting-edge technology
@@ -326,10 +328,7 @@ export const Services = () => {
 
       {/* ====== CENTER ANIMATION ====== */}
       <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        whileInView={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.8, delay: 0.4 }}
-        viewport={{ once: true }}
+        {...revealScale({ from: 0.95, transition: { duration: 0.9, delay: 0.4 } })}
         onAnimationComplete={handleEntryAnimationComplete}
         className="max-w-6xl mx-auto"
       >
@@ -340,15 +339,15 @@ export const Services = () => {
           {/* Center logo */}
           <motion.div
             ref={centerRef}
-            initial={{ scale: 0, opacity: 0 }}
-            whileInView={{ scale: 1, opacity: 1 }}
+            initial={{ scale: 0 }}
+            whileInView={{ scale: 1 }}
             transition={{
-              duration: 0.6,
+              duration: 0.7,
               delay: 0.6,
               type: "spring",
               bounce: 0.4,
             }}
-            viewport={{ once: true }}
+            viewport={{ once: true, margin: "0px 0px -80px 0px" }}
             onAnimationComplete={handleEntryAnimationComplete}
             className="absolute top-12 sm:top-16 md:top-20 left-1/2 -translate-x-1/2 z-20"
           >
@@ -359,6 +358,7 @@ export const Services = () => {
                   alt="SGrids Logo"
                   width={80}
                   height={80}
+                  onLoad={() => markDiagramImageLoaded(0)}
                   className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
                 />
               </div>
@@ -372,15 +372,15 @@ export const Services = () => {
                 <motion.div
                   key={service.title}
                   ref={service.ref}
-                  initial={{ opacity: 0, y: 50 }}
-                  whileInView={{ opacity: 1, y: 0 }}
+                  initial={{ y: 40, scale: 0.85 }}
+                  whileInView={{ y: 0, scale: 1 }}
                   transition={{
-                    duration: 0.6,
+                    duration: 0.7,
                     delay: 0.8 + index * 0.1,
                     type: "spring",
-                    bounce: 0.4,
+                    bounce: 0.35,
                   }}
-                  viewport={{ once: true }}
+                  viewport={{ once: true, margin: "0px 0px -60px 0px" }}
                   onAnimationComplete={handleEntryAnimationComplete}
                   className="flex flex-col items-center group cursor-pointer"
                 >
@@ -412,12 +412,9 @@ export const Services = () => {
                         width={60}
                         height={60}
                         onLoad={() => {
+                          markDiagramImageLoaded(index + 1);
                           requestAnimationFrame(() => {
-                            requestAnimationFrame(() => {
-                              setTimeout(() => measure(), 50);
-                              setTimeout(() => measure(), 200);
-                              setTimeout(() => measure(), 500);
-                            });
+                            requestAnimationFrame(() => measure());
                           });
                         }}
                         className="w-full h-full object-contain brightness-0 dark:brightness-0 dark:invert transition-all duration-500"
@@ -457,10 +454,7 @@ export const Services = () => {
         {/* Title */}
         <div className="max-w-7xl mx-auto mb-2 sm:mb-6 md:mb-8 w-full px-2 sm:px-4">
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
+          {...reveal({ transition: { duration: 0.9 } })}
           className="mb-0 sm:mb-6 md:mb-8 lg:mb-16"
         >
           <p className="text-center py-2 sm:py-4 md:py-6 lg:py-8 text-gray-500 dark:text-gray-500 text-xs sm:text-sm font-semibold uppercase tracking-wider mb-2 sm:mb-4 md:mb-6 lg:mb-8 font-sans">
@@ -470,10 +464,7 @@ export const Services = () => {
 
           {/* Description */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            viewport={{ once: true }}
+            {...reveal({ offset: 18, transition: { duration: 0.9, delay: 0.2 } })}
             className="max-w-4xl mx-auto mb-6 sm:mb-8 w-full"
           >
             <p className="text-center text-gray-700 dark:text-gray-300 text-sm sm:text-base md:text-lg leading-relaxed mb-3 sm:mb-4 px-2">
@@ -491,10 +482,7 @@ export const Services = () => {
             {featureData.map((card, index) => (
               <motion.div
                 key={index}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                viewport={{ once: true }}
+                {...reveal({ offset: 40, blur: 6, transition: { duration: 0.8, delay: index * 0.08 } })}
                 className="group relative min-h-[240px] sm:min-h-[260px] md:min-h-[280px] p-3 sm:p-4 md:p-6 lg:p-8 overflow-hidden rounded-xl sm:rounded-2xl border-2 border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 hover:border-orange-500 dark:hover:border-orange-500 transition-all duration-500 hover:shadow-[0_0_30px_rgba(249,115,22,0.2)] dark:hover:shadow-[0_0_30px_rgba(249,115,22,0.3)] hover:scale-[1.02]"
               >
                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-500 pointer-events-none z-0 bg-gradient-to-br from-orange-50 via-purple-50 to-white dark:from-orange-950/20 dark:via-purple-950/20 dark:to-gray-950" />

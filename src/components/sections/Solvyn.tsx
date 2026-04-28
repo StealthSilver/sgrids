@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useRef, useState, useCallback } from "react"
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { IconState, Points } from "../../types/solvynTypes";
+import { reveal, revealScale } from "@/lib/scrollReveal";
 import {
   TaxIcon,
   ClimateIcon,
@@ -20,6 +21,7 @@ import {
 import { SolvynIconNode } from "../ui/SolvynIconNode";
 import { SolvynBeams } from "../ui/SolvynBeams";
 import { useSolvynAnimation } from "../../hooks/useSolvynAnimation";
+import { useDiagramAnimationReady } from "@/lib/useDiagramAnimationReady";
 
 const ICON_CONFIG = [
   { id: "tax" as const, label: "Merchant Services", component: TaxIcon },
@@ -123,6 +125,11 @@ export const Solvyn: React.FC = () => {
     mounted: false,
   });
   const { isMobile, isTablet, mounted } = screen;
+
+  const { animationReady: beamAnimationReady, markDiagramImageLoaded } = useDiagramAnimationReady(
+    mounted,
+    1
+  );
 
   useEffect(() => {
     const compute = () => {
@@ -365,6 +372,7 @@ export const Solvyn: React.FC = () => {
     beamRefs,
     progressRefs,
     setIcons,
+    enabled: beamAnimationReady,
   });
 
   return (
@@ -376,10 +384,7 @@ export const Solvyn: React.FC = () => {
         <div className="flex flex-col items-center gap-4 sm:gap-6 md:gap-8 lg:gap-10">
           {/* SOLVYN Title */}
           <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
+            {...reveal({ transition: { duration: 0.9 } })}
             className="mb-2 sm:mb-4 md:mb-6 lg:mb-8"
           >
             <p className="text-center text-gray-500 dark:text-gray-500 text-xs sm:text-sm font-semibold uppercase tracking-wider mb-2 sm:mb-4 md:mb-6 lg:mb-8 font-sans">
@@ -389,37 +394,25 @@ export const Solvyn: React.FC = () => {
 
           {/* Centered Text Content */}
           <motion.div
-            initial={{ opacity: 0, y: -30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
+            {...reveal({ direction: "down", offset: 24, transition: { duration: 0.9 } })}
             className="space-y-4 sm:space-y-5 md:space-y-6 text-center max-w-4xl font-sans"
           >
             <motion.h2
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              viewport={{ once: true }}
+              {...reveal({ offset: 18, transition: { duration: 0.7 } })}
               className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-medium leading-tight text-gray-900 dark:text-white tracking-tight"
             >
               Innovation With Purpose
             </motion.h2>
 
             <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              viewport={{ once: true }}
+              {...reveal({ offset: 18, transition: { duration: 0.7, delay: 0.1 } })}
               className="text-sm sm:text-base lg:text-lg leading-relaxed text-gray-600 dark:text-gray-300"
             >
               Innovation is our engine, purpose is our compass, and experience is the ground we stand on.
             </motion.p>
 
             <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              viewport={{ once: true }}
+              {...reveal({ offset: 18, transition: { duration: 0.7, delay: 0.2 } })}
               className="text-sm sm:text-base lg:text-lg leading-relaxed text-gray-600 dark:text-gray-300"
             >
               <span className="font-semibold text-orange-600 dark:text-orange-400">Solvyn</span> was built
@@ -428,10 +421,7 @@ export const Solvyn: React.FC = () => {
             </motion.p>
 
             <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              viewport={{ once: true }}
+              {...reveal({ offset: 18, transition: { duration: 0.7, delay: 0.3 } })}
               className="text-sm sm:text-base lg:text-lg leading-relaxed text-gray-600 dark:text-gray-300"
             >
               More than a platform, Solvyn is a new way of running energy: a secure, AI-driven system that
@@ -448,10 +438,7 @@ export const Solvyn: React.FC = () => {
             </motion.p>
 
             <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              viewport={{ once: true }}
+              {...reveal({ offset: 18, transition: { duration: 0.7, delay: 0.4 } })}
               className="text-sm sm:text-base lg:text-lg leading-relaxed font-medium text-gray-900 dark:text-gray-100"
             >
               Where others give you fragments, Solvyn gives you the whole picture — automation that scales,
@@ -463,23 +450,14 @@ export const Solvyn: React.FC = () => {
           <div className="w-full max-w-5xl">
             <motion.div
             ref={containerRef}
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              viewport={{ once: true }}
+              {...revealScale({ from: 0.92, transition: { duration: 0.9, delay: 0.2 } })}
               onAnimationComplete={handleEntryAnimationComplete}
               className="relative flex items-center justify-center w-full"
               style={containerStyle}
           >
             {/* Center SGrids Logo */}
-              <motion.div 
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                transition={{ 
-                  duration: 0.8, 
-                  delay: 0.4,
-                }}
-                viewport={{ once: true }}
+              <motion.div
+                {...revealScale({ from: 0.85, transition: { duration: 0.8, delay: 0.4 } })}
                 onAnimationComplete={handleEntryAnimationComplete}
                 className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20 flex flex-col items-center gap-2 sm:gap-3"
               >
@@ -495,6 +473,7 @@ export const Solvyn: React.FC = () => {
                       width={isMobile ? 40 : isTablet ? 60 : 80}
                       height={isMobile ? 40 : isTablet ? 60 : 80}
                   src="/sgrids.svg"
+                      onLoad={() => markDiagramImageLoaded(0)}
                       className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
                 />
               </div>

@@ -7,6 +7,8 @@ type UseServicesAnimationProps = {
   beamRefs: React.MutableRefObject<{ circle: SVGPathElement | null; core: SVGPathElement | null; pulse: SVGCircleElement | null }[]>;
   progressRefs: React.MutableRefObject<number[]>;
   setIconActive?: (index: number, active: boolean) => void;
+  /** When false, the beam RAF loop does not run (waits for images/fonts/layout). */
+  enabled?: boolean;
 };
 
 // Staggered delays for 4 beams: start at 0, 0.2s, 0.4s, 0.6s
@@ -20,6 +22,7 @@ export const useServicesAnimation = ({
   beamRefs,
   progressRefs,
   setIconActive,
+  enabled = true,
 }: UseServicesAnimationProps) => {
   const lastTimestampRef = useRef<number | null>(null);
   const pathLengthsRef = useRef<number[]>([]);
@@ -28,7 +31,7 @@ export const useServicesAnimation = ({
   const startTimeRef = useRef<number | null>(null);
 
   useEffect(() => {
-    if (!points || points.targets.length < 4) return;
+    if (!enabled || !points || points.targets.length < 4) return;
 
     // Reset start time when points change
     startTimeRef.current = Date.now();
@@ -180,5 +183,5 @@ export const useServicesAnimation = ({
       timeoutIds.forEach(id => clearTimeout(id));
       lastTimestampRef.current = null;
     };
-  }, [points, pathRefs, beamRefs, progressRefs, setIconActive]);
+  }, [enabled, points, pathRefs, beamRefs, progressRefs, setIconActive]);
 };

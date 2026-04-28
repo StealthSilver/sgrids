@@ -258,4 +258,16 @@
       opacity: 1;
     }
   }
+
+  /* Trusted-by logo strip: one loop = half the duplicated track width */
+  --animate-logo-ticker: logo-ticker-scroll 90s linear infinite;
+
+  @keyframes logo-ticker-scroll {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
 }

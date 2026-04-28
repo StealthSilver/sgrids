@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { FaXTwitter } from "react-icons/fa6";
+import { reveal } from "@/lib/scrollReveal";
 
 export const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -90,10 +91,7 @@ export const Footer = () => {
         <div className="grid grid-cols-2 lg:grid-cols-6 gap-3 sm:gap-4 lg:gap-12 mb-8 sm:mb-12">
           {/* Logo and Description */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
+            {...reveal({ offset: 18, transition: { duration: 0.8 } })}
             className="col-span-2 lg:col-span-2 mb-4 sm:mb-0"
           >
             <div className="mb-3 sm:mb-4">
@@ -147,10 +145,7 @@ export const Footer = () => {
           {Object.entries(footerLinks).map(([section, links], idx) => (
             <motion.div
               key={section}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 * (idx + 1) }}
-              viewport={{ once: true }}
+              {...reveal({ offset: 18, transition: { duration: 0.8, delay: 0.08 * (idx + 1) } })}
               className="mb-0 lg:mb-0"
             >
               <h3 className="text-gray-900 dark:text-gray-100 font-bold text-xs sm:text-sm uppercase tracking-wider mb-1.5 sm:mb-4 font-sans">
@@ -171,10 +166,12 @@ export const Footer = () => {
       </div>
 
       <motion.div
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        transition={{ duration: 0.6, delay: 0.5 }}
-        viewport={{ once: true }}
+        {...reveal({
+          offset: 0,
+          margin: "0px",
+          amount: "some",
+          transition: { duration: 0.8, delay: 0.4 },
+        })}
         className="relative left-1/2 right-1/2 -mx-[50vw] w-[100vw] border-t border-gray-200 dark:border-gray-800"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">

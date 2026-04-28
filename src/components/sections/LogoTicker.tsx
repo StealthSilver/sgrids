@@ -26,8 +26,6 @@ import vena from "@/assets/logo/vena_logo.png";
 import waree from "@/assets/logo/waree_logo.png";
 import kalpatru from "@/assets/logo/kalpatru_logo.webp";
 import Image from "next/image";
-import { motion, useAnimationControls } from "framer-motion";
-import { useState } from "react";
 
 const logos = [
   ampex,
@@ -56,29 +54,11 @@ const logos = [
 ];
 
 export const LogoTicker = () => {
-  const [isHovered, setIsHovered] = useState(false);
-
   return (
     <div className="py-4 sm:py-5 lg:py-6 mt-6 sm:mt-8 lg:mt-12 mb-6 sm:mb-8 lg:mb-12 bg-transparent relative z-10">
       <div className="container mx-auto px-4">
-        <div 
-          className="flex overflow-hidden [mask-image:linear-gradient(to_right,transparent,black,transparent)] justify-center pointer-events-auto"
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
-        >
-          <motion.div
-            className="flex gap-8 sm:gap-12 lg:gap-20 flex-none"
-            animate={{
-              translateX: "-50%",
-            }}
-            transition={{
-              duration: 40,
-              repeat: Infinity,
-              ease: "linear",
-              repeatType: "loop",
-              ...(isHovered && { duration: 0 }),
-            }}
-          >
+        <div className="group flex overflow-hidden [mask-image:linear-gradient(to_right,transparent,black,transparent)] justify-center pointer-events-auto">
+          <div className="flex gap-8 sm:gap-12 lg:gap-20 flex-none animate-logo-ticker will-change-transform motion-reduce:animate-none group-hover:[animation-play-state:paused]">
             {logos.concat(logos).map((logo, index) => (
               <Image
                 key={index}
@@ -90,7 +70,7 @@ export const LogoTicker = () => {
                 style={{ objectFit: "contain" }}
               />
             ))}
-          </motion.div>
+          </div>
         </div>
       </div>
     </div>

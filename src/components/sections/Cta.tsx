@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { ShimmerButton } from "../ui/ShimmerButton";
 import { LazyLogoTicker } from "../ui/LazyLogoTicker";
 import { BorderBeam } from "../ui/BorderBeam"; // animated border
+import { reveal } from "@/lib/scrollReveal";
 
 export const Cta = () => {
   const [formData, setFormData] = useState({
@@ -98,10 +99,7 @@ export const Cta = () => {
       <div className="max-w-7xl mx-auto">
         {/* Trusted By Section */}
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
+          {...reveal({ transition: { duration: 0.9 } })}
           className="mb-8 sm:mb-12 lg:mb-16"
         >
           <p className="text-center text-gray-500 dark:text-gray-500 mb-6 sm:mb-8 text-xs sm:text-sm font-semibold uppercase tracking-wider font-sans">
@@ -112,29 +110,10 @@ export const Cta = () => {
 
         {/* CTA Heading */}
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          viewport={{ once: true }}
-          className="text-center mb-8 sm:mb-12 lg:mb-24 relative"
+          {...reveal({ transition: { duration: 0.9, delay: 0.2 } })}
+          className="text-center mb-10 sm:mb-16 lg:mb-28"
         >
-          {/* Animated Glow Background */}
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <motion.div
-              className="w-[300px] sm:w-[400px] lg:w-[500px] h-[140px] sm:h-[180px] lg:h-[240px] bg-gradient-to-r from-orange-500/15 via-orange-400/20 to-orange-500/15 dark:from-orange-500/25 dark:via-orange-400/35 dark:to-orange-500/25 rounded-full blur-3xl"
-              animate={{
-                scale: [1, 1.05, 1],
-                opacity: [0.25, 0.4, 0.25],
-              }}
-              transition={{
-                duration: 5,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-            />
-          </div>
-
-          <div className="relative z-10 py-12 sm:py-6 lg:py-8">
+          <div className="py-16 sm:py-14 lg:py-20">
             <h2 className="font-ibm-plex-sans text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold mb-3 sm:mb-4 lg:mb-6 tracking-tight">
               <span
                 className="bg-gradient-to-r from-orange-600 via-orange-500 to-orange-600 dark:from-orange-400 dark:via-orange-300 dark:to-orange-400 bg-clip-text text-transparent inline-block animate-gradient pb-1"
@@ -154,10 +133,7 @@ export const Cta = () => {
         <div className="flex flex-col lg:grid lg:grid-cols-2 gap-8 sm:gap-10 lg:gap-20 items-start">
           {/* Form - Shows first on mobile, second on desktop */}
           <motion.div
-            initial={{ opacity: 0, x: 40 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            viewport={{ once: true }}
+            {...reveal({ direction: "left", offset: 40, transition: { duration: 0.9, delay: 0.2 } })}
             className="relative bg-white/60 dark:bg-gray-900/60 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 border border-gray-200 dark:border-gray-800 overflow-hidden w-full order-1 lg:order-2"
           >
             {/* Animated Border Beam */}
@@ -309,10 +285,7 @@ export const Cta = () => {
 
           {/* Contact Info - Shows second on mobile, first on desktop */}
           <motion.div
-            initial={{ opacity: 0, x: -40 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            viewport={{ once: true }}
+            {...reveal({ direction: "right", offset: 40, transition: { duration: 0.9, delay: 0.2 } })}
             className="space-y-6 sm:space-y-7 lg:space-y-8 w-full order-2 lg:order-1"
           >
             <div className="space-y-4 sm:space-y-5 lg:space-y-6 mt-0 lg:mt-8">

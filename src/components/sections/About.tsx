@@ -4,6 +4,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
+import { reveal } from "@/lib/scrollReveal";
 
 export const About = () => {
   const { theme, resolvedTheme } = useTheme();
@@ -46,10 +47,7 @@ export const About = () => {
       <div className="max-w-7xl mx-auto">
         {/* Unified Hero: label + centered diffused image and overlaid text */}
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          viewport={{ once: true }}
+          {...reveal({ transition: { duration: 0.9, delay: 0.2 } })}
           className="relative mx-auto w-full max-w-5xl min-h-[520px] sm:min-h-[600px] lg:min-h-[680px] flex items-center justify-center overflow-hidden rounded-2xl sm:rounded-3xl bg-transparent dark:bg-black/50 mb-8 sm:mb-12 lg:mb-16"
         >
           {/* Diffused, center-aligned about image */}
@@ -86,19 +84,13 @@ export const About = () => {
           {/* Overlaid, center-aligned text content */}
           <div className="relative z-10 flex flex-col items-center text-center px-4 sm:px-8 py-14 sm:py-20 lg:py-24 max-w-3xl text-gray-600 dark:text-white dark:[text-shadow:0_1px_3px_rgba(0,0,0,0.45)]">
             <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              viewport={{ once: true }}
+              {...reveal({ offset: 18, transition: { duration: 0.8 } })}
               className="text-xs sm:text-sm font-semibold uppercase tracking-wider font-sans mb-6 sm:mb-8 text-gray-500 dark:text-white dark:[text-shadow:0_1px_2px_rgba(0,0,0,0.35)]"
             >
               About Us
             </motion.p>
             <motion.h2
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.3 }}
-              viewport={{ once: true }}
+              {...reveal({ offset: 18, transition: { duration: 0.9, delay: 0.3 } })}
               className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-medium leading-tight text-gray-900 dark:text-white font-sans tracking-tight"
             >
               We're not just building software  we're engineering the operating
@@ -106,10 +98,7 @@ export const About = () => {
             </motion.h2>
 
             <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.45 }}
-              viewport={{ once: true }}
+              {...reveal({ offset: 18, transition: { duration: 0.9, delay: 0.45 } })}
               className="mt-6 sm:mt-8 text-sm sm:text-base lg:text-lg leading-relaxed font-sans text-gray-600 dark:text-white"
             >
               At Smart Grid Analytics, our mission is to transform how clean
@@ -124,10 +113,7 @@ export const About = () => {
             </motion.p>
 
             <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.6 }}
-              viewport={{ once: true }}
+              {...reveal({ offset: 18, transition: { duration: 0.9, delay: 0.6 } })}
               className="mt-4 sm:mt-5 text-xs sm:text-sm lg:text-base leading-relaxed font-sans text-gray-600 dark:text-white"
             >
               From solar parks and wind farms to hybrid plants and large-scale
@@ -146,10 +132,7 @@ export const About = () => {
 
         {/* About the Team Section */}
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
-          viewport={{ once: true }}
+          {...reveal({ transition: { duration: 0.9, delay: 0.4 } })}
           className="mt-12 sm:mt-16 lg:mt-32"
         >
           <p className="text-center text-gray-500 dark:text-gray-500 text-xs sm:text-sm font-semibold uppercase tracking-wider mb-6 sm:mb-8 font-sans">
@@ -159,10 +142,7 @@ export const About = () => {
           <div className="space-y-12 sm:space-y-16 md:space-y-24 lg:space-y-48 mt-8 sm:mt-12 lg:mt-28 py-4 sm:py-6 lg:py-8">
             {/* Team Member 1 - Kumar M */}
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              viewport={{ once: true }}
+              {...reveal({ direction: "right", offset: 30, transition: { duration: 0.9, delay: 0.1 } })}
               className="relative border-2 border-gray-300 dark:border-gray-700 rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-10 backdrop-blur-md bg-white/50 dark:bg-black/50 min-h-[200px] sm:min-h-[280px] lg:min-h-[320px]"
             >
               {/* Mobile/Tablet Layout */}
@@ -206,10 +186,7 @@ export const About = () => {
 
             {/* Team Member 2 - Venkata Krishnan */}
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              viewport={{ once: true }}
+              {...reveal({ direction: "left", offset: 30, transition: { duration: 0.9, delay: 0.15 } })}
               className="relative border-2 border-gray-300 dark:border-gray-700 rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-10 backdrop-blur-md bg-white/50 dark:bg-black/50 min-h-[200px] sm:min-h-[280px] lg:min-h-[320px]"
             >
               {/* Mobile/Tablet Layout */}
@@ -253,10 +230,7 @@ export const About = () => {
 
             {/* Team Member 3 - Tirumaleswara Reddy K */}
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              viewport={{ once: true }}
+              {...reveal({ direction: "right", offset: 30, transition: { duration: 0.9, delay: 0.1 } })}
               className="relative border-2 border-gray-300 dark:border-gray-700 rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-10 backdrop-blur-md bg-white/50 dark:bg-black/50 min-h-[200px] sm:min-h-[280px] lg:min-h-[320px]"
             >
               {/* Mobile/Tablet Layout */}
@@ -300,10 +274,7 @@ export const About = () => {
 
             {/* Team Member 4 - Pankaj Ghai */}
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              viewport={{ once: true }}
+              {...reveal({ direction: "left", offset: 30, transition: { duration: 0.9, delay: 0.15 } })}
               className="relative border-2 border-gray-300 dark:border-gray-700 rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-10 backdrop-blur-md bg-white/50 dark:bg-black/50 min-h-[200px] sm:min-h-[280px] lg:min-h-[320px]"
             >
               {/* Mobile/Tablet Layout */}
