@@ -5,8 +5,6 @@ import { motion } from "framer-motion";
 import { ShimmerButton } from "../ui/ShimmerButton";
 import { LazyLogoTicker } from "../ui/LazyLogoTicker";
 import { BorderBeam } from "../ui/BorderBeam"; // animated border
-import { reveal } from "@/lib/scrollReveal";
-
 export const Cta = () => {
   const [formData, setFormData] = useState({
     name: "",
@@ -98,21 +96,15 @@ export const Cta = () => {
     >
       <div className="max-w-7xl mx-auto">
         {/* Trusted By Section */}
-        <motion.div
-          {...reveal({ transition: { duration: 0.9 } })}
-          className="mb-8 sm:mb-12 lg:mb-16"
-        >
+        <div className="mb-8 sm:mb-12 lg:mb-16">
           <p className="text-center text-gray-500 dark:text-gray-500 mb-6 sm:mb-8 text-xs sm:text-sm font-semibold uppercase tracking-wider font-sans">
             Trusted by Industry Leaders
           </p>
           <LazyLogoTicker />
-        </motion.div>
+        </div>
 
         {/* CTA Heading */}
-        <motion.div
-          {...reveal({ transition: { duration: 0.9, delay: 0.2 } })}
-          className="text-center mb-10 sm:mb-16 lg:mb-28"
-        >
+        <div className="text-center mb-10 sm:mb-16 lg:mb-28">
           <div className="py-16 sm:py-14 lg:py-20">
             <h2 className="font-ibm-plex-sans text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold mb-3 sm:mb-4 lg:mb-6 tracking-tight">
               <span
@@ -127,15 +119,12 @@ export const Cta = () => {
               Ready to transform your renewable energy operations? Connect with our team and discover how Solvyn can power your success.
             </p>
           </div>
-        </motion.div>
+        </div>
 
         {/* Content Grid - Mobile: Form first, then Contact Info */}
         <div className="flex flex-col lg:grid lg:grid-cols-2 gap-8 sm:gap-10 lg:gap-20 items-start">
           {/* Form - Shows first on mobile, second on desktop */}
-          <motion.div
-            {...reveal({ direction: "left", offset: 40, transition: { duration: 0.9, delay: 0.2 } })}
-            className="relative bg-white/60 dark:bg-gray-900/60 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 border border-gray-200 dark:border-gray-800 overflow-hidden w-full order-1 lg:order-2"
-          >
+          <div className="relative bg-white/60 dark:bg-gray-900/60 backdrop-blur-sm rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 border border-gray-200 dark:border-gray-800 overflow-hidden w-full order-1 lg:order-2">
             {/* Animated Border Beam */}
             <BorderBeam
               size={300}
@@ -281,13 +270,10 @@ export const Cta = () => {
                 </motion.div>
               )}
             </form>
-          </motion.div>
+          </div>
 
           {/* Contact Info - Shows second on mobile, first on desktop */}
-          <motion.div
-            {...reveal({ direction: "right", offset: 40, transition: { duration: 0.9, delay: 0.2 } })}
-            className="space-y-6 sm:space-y-7 lg:space-y-8 w-full order-2 lg:order-1"
-          >
+          <div className="space-y-6 sm:space-y-7 lg:space-y-8 w-full order-2 lg:order-1">
             <div className="space-y-4 sm:space-y-5 lg:space-y-6 mt-0 lg:mt-8">
               {/* Contact Item */}
               {[
@@ -389,7 +375,7 @@ export const Cta = () => {
                 </div>
               </div>
             </div>
-          </motion.div>
+          </div>
         </div>
       </div>
     </section>

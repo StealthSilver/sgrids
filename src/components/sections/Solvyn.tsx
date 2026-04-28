@@ -1,9 +1,7 @@
 "use client";
 import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
-import { motion } from "framer-motion";
 import Image from "next/image";
 import { IconState, Points } from "../../types/solvynTypes";
-import { reveal, revealScale } from "@/lib/scrollReveal";
 import {
   TaxIcon,
   ClimateIcon,
@@ -181,7 +179,7 @@ export const Solvyn: React.FC = () => {
   const ICON_POSITIONS = isMobile || isTablet ? ICON_POSITIONS_MOBILE : ICON_POSITIONS_DESKTOP;
   const stablePositions = isMobile || isTablet ? POSITIONS_MOBILE_STABLE : POSITIONS_DESKTOP_STABLE;
 
-  // Memoize the container style so framer-motion doesn't receive a fresh
+  // Memoize the container style so the element doesn't receive a fresh
   // style object on every render.
   const containerStyle = useMemo(
     () => ({
@@ -326,8 +324,7 @@ export const Solvyn: React.FC = () => {
     });
 
     // IntersectionObserver: re-run measurements whenever the section scrolls
-    // into view. The framer-motion entry animations temporarily offset
-    // bounding boxes, and without this we'd measure too early.
+    // into view. Without this we'd measure too early.
     const intersectionObserver = new IntersectionObserver(
       (entries) => {
         if (entries[0]?.isIntersecting) scheduleMeasure();
@@ -339,7 +336,7 @@ export const Solvyn: React.FC = () => {
     scheduleMeasure();
 
     // A handful of sparse fallback measures during the first ~1s covers the
-    // period when framer-motion entry animations are still running.
+    // period right after mount.
     const timers = [
       setTimeout(scheduleMeasure, 150),
       setTimeout(scheduleMeasure, 500),
@@ -353,17 +350,6 @@ export const Solvyn: React.FC = () => {
       timers.forEach((t) => clearTimeout(t));
     };
   }, [measure, isMobile, isTablet, mounted, iconRefs]);
-
-  // Trigger a fresh measurement after any of the entry animations complete
-  // (container scaling from 0.9 → 1, or the icon nodes fading in). Without
-  // this, we rely on setTimeouts racing the animation, which is what caused
-  // the "animation only works on refresh" bug.
-  const handleEntryAnimationComplete = useCallback(() => {
-    requestAnimationFrame(() => {
-      requestAnimationFrame(measure);
-      setTimeout(measure, 100);
-    });
-  }, [measure]);
 
   // Animation hook
   useSolvynAnimation({
@@ -383,47 +369,29 @@ export const Solvyn: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex flex-col items-center gap-4 sm:gap-6 md:gap-8 lg:gap-10">
           {/* SOLVYN Title */}
-          <motion.div
-            {...reveal({ transition: { duration: 0.9 } })}
-            className="mb-2 sm:mb-4 md:mb-6 lg:mb-8"
-          >
+          <div className="mb-2 sm:mb-4 md:mb-6 lg:mb-8">
             <p className="text-center text-gray-500 dark:text-gray-500 text-xs sm:text-sm font-semibold uppercase tracking-wider mb-2 sm:mb-4 md:mb-6 lg:mb-8 font-sans">
               Solvyn
             </p>
-          </motion.div>
+          </div>
 
           {/* Centered Text Content */}
-          <motion.div
-            {...reveal({ direction: "down", offset: 24, transition: { duration: 0.9 } })}
-            className="space-y-4 sm:space-y-5 md:space-y-6 text-center max-w-4xl font-sans"
-          >
-            <motion.h2
-              {...reveal({ offset: 18, transition: { duration: 0.7 } })}
-              className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-medium leading-tight text-gray-900 dark:text-white tracking-tight"
-            >
+          <div className="space-y-4 sm:space-y-5 md:space-y-6 text-center max-w-4xl font-sans">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-medium leading-tight text-gray-900 dark:text-white tracking-tight">
               Innovation With Purpose
-            </motion.h2>
+            </h2>
 
-            <motion.p
-              {...reveal({ offset: 18, transition: { duration: 0.7, delay: 0.1 } })}
-              className="text-sm sm:text-base lg:text-lg leading-relaxed text-gray-600 dark:text-gray-300"
-            >
+            <p className="text-sm sm:text-base lg:text-lg leading-relaxed text-gray-600 dark:text-gray-300">
               Innovation is our engine, purpose is our compass, and experience is the ground we stand on.
-            </motion.p>
+            </p>
 
-            <motion.p
-              {...reveal({ offset: 18, transition: { duration: 0.7, delay: 0.2 } })}
-              className="text-sm sm:text-base lg:text-lg leading-relaxed text-gray-600 dark:text-gray-300"
-            >
+            <p className="text-sm sm:text-base lg:text-lg leading-relaxed text-gray-600 dark:text-gray-300">
               <span className="font-semibold text-orange-600 dark:text-orange-400">Solvyn</span> was built
               for the complexity of renewable energy — to turn scattered data into unified intelligence
               across every layer of operations, from the control room to the boardroom.
-            </motion.p>
+            </p>
 
-            <motion.p
-              {...reveal({ offset: 18, transition: { duration: 0.7, delay: 0.3 } })}
-              className="text-sm sm:text-base lg:text-lg leading-relaxed text-gray-600 dark:text-gray-300"
-            >
+            <p className="text-sm sm:text-base lg:text-lg leading-relaxed text-gray-600 dark:text-gray-300">
               More than a platform, Solvyn is a new way of running energy: a secure, AI-driven system that
               unifies <span className="font-semibold">SCADA</span>, <span className="font-semibold">EMS</span>
               , <span className="font-semibold">PPC</span>, <span className="font-semibold">EPM</span>, and{" "}
@@ -435,49 +403,42 @@ export const Solvyn: React.FC = () => {
               <span className="font-semibold text-gray-800 dark:text-gray-200">green hydrogen</span>, and
               built to serve those who carry the responsibility of the transition — operators seeking
               reliability, investors seeking returns, and governments driving national clean energy goals.
-            </motion.p>
+            </p>
 
-            <motion.p
-              {...reveal({ offset: 18, transition: { duration: 0.7, delay: 0.4 } })}
-              className="text-sm sm:text-base lg:text-lg leading-relaxed font-medium text-gray-900 dark:text-gray-100"
-            >
+            <p className="text-sm sm:text-base lg:text-lg leading-relaxed font-medium text-gray-900 dark:text-gray-100">
               Where others give you fragments, Solvyn gives you the whole picture — automation that scales,
               compliance that&apos;s built in, and intelligence that&apos;s always one step ahead.
-            </motion.p>
-          </motion.div>
+            </p>
+          </div>
 
           {/* Centered Animation Container */}
           <div className="w-full max-w-5xl">
-            <motion.div
-            ref={containerRef}
-              {...revealScale({ from: 0.92, transition: { duration: 0.9, delay: 0.2 } })}
-              onAnimationComplete={handleEntryAnimationComplete}
+            <div
+              ref={containerRef}
               className="relative flex items-center justify-center w-full"
               style={containerStyle}
-          >
-            {/* Center SGrids Logo */}
-              <motion.div
-                {...revealScale({ from: 0.85, transition: { duration: 0.8, delay: 0.4 } })}
-                onAnimationComplete={handleEntryAnimationComplete}
+            >
+              {/* Center SGrids Logo */}
+              <div
                 className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20 flex flex-col items-center gap-2 sm:gap-3"
               >
-              <div
-                ref={sgridsRef}
+                <div
+                  ref={sgridsRef}
                   className={`relative rounded-2xl bg-gradient-to-br from-orange-500 via-purple-600 to-orange-500 p-[2px] shadow-2xl hover:shadow-orange-500/50 dark:hover:shadow-orange-500/70 transition-all duration-500 group ${
                     isMobile ? "w-12 h-12 sm:w-16 sm:h-16" : isTablet ? "w-16 h-16 md:w-20 md:h-20" : "w-20 h-20 md:w-24 md:h-24"
                   }`}
-              >
+                >
                   <div className="w-full h-full rounded-2xl bg-white dark:bg-gray-900 flex items-center justify-center backdrop-blur-sm p-2 sm:p-3">
                     <Image
-                  alt="SGrids Logo"
+                      alt="SGrids Logo"
                       width={isMobile ? 40 : isTablet ? 60 : 80}
                       height={isMobile ? 40 : isTablet ? 60 : 80}
-                  src="/sgrids.svg"
+                      src="/sgrids.svg"
                       onLoad={() => markDiagramImageLoaded(0)}
                       className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
-                />
-              </div>
-            </div>
+                    />
+                  </div>
+                </div>
                 {/* Solvyn text box */}
                 <div className={`rounded-lg bg-gradient-to-br from-orange-50 to-purple-50 dark:from-orange-950/30 dark:to-purple-950/30 border-2 border-orange-500/30 dark:border-orange-500/50 shadow-lg ${
                   isMobile ? "px-2 py-1" : "px-4 py-2"
@@ -486,9 +447,9 @@ export const Solvyn: React.FC = () => {
                     isMobile ? "text-sm" : "text-lg"
                   }`}>
                     Solvyn
-                </span>
-            </div>
-              </motion.div>
+                  </span>
+                </div>
+              </div>
 
               {/* Icon Nodes */}
               {icons.map((icon, idx) => {
@@ -506,7 +467,6 @@ export const Solvyn: React.FC = () => {
                     borderColor={positionData.borderColor}
                     isMobile={isMobile}
                     isTablet={isTablet}
-                    onEntryComplete={handleEntryAnimationComplete}
                   />
                 );
               })}
@@ -520,7 +480,7 @@ export const Solvyn: React.FC = () => {
                 isMobile={isMobile}
                 isTablet={isTablet}
               />
-            </motion.div>
+            </div>
           </div>
         </div>
       </div>

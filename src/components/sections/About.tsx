@@ -1,10 +1,8 @@
 "use client";
 
 import React from "react";
-import { motion } from "framer-motion";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
-import { reveal } from "@/lib/scrollReveal";
 
 export const About = () => {
   const { theme, resolvedTheme } = useTheme();
@@ -46,10 +44,7 @@ export const About = () => {
     >
       <div className="max-w-7xl mx-auto">
         {/* Unified Hero: label + centered diffused image and overlaid text */}
-        <motion.div
-          {...reveal({ transition: { duration: 0.9, delay: 0.2 } })}
-          className="relative mx-auto w-full max-w-5xl min-h-[520px] sm:min-h-[600px] lg:min-h-[680px] flex items-center justify-center overflow-hidden rounded-2xl sm:rounded-3xl bg-transparent dark:bg-black/50 mb-8 sm:mb-12 lg:mb-16"
-        >
+        <div className="relative mx-auto w-full max-w-5xl min-h-[520px] sm:min-h-[600px] lg:min-h-[680px] flex items-center justify-center overflow-hidden rounded-2xl sm:rounded-3xl bg-transparent dark:bg-black/50 mb-8 sm:mb-12 lg:mb-16">
           {/* Diffused, center-aligned about image */}
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
             <img
@@ -83,24 +78,15 @@ export const About = () => {
 
           {/* Overlaid, center-aligned text content */}
           <div className="relative z-10 flex flex-col items-center text-center px-4 sm:px-8 py-14 sm:py-20 lg:py-24 max-w-3xl text-gray-600 dark:text-white dark:[text-shadow:0_1px_3px_rgba(0,0,0,0.45)]">
-            <motion.p
-              {...reveal({ offset: 18, transition: { duration: 0.8 } })}
-              className="text-xs sm:text-sm font-semibold uppercase tracking-wider font-sans mb-6 sm:mb-8 text-gray-500 dark:text-white dark:[text-shadow:0_1px_2px_rgba(0,0,0,0.35)]"
-            >
+            <p className="text-xs sm:text-sm font-semibold uppercase tracking-wider font-sans mb-6 sm:mb-8 text-gray-500 dark:text-white dark:[text-shadow:0_1px_2px_rgba(0,0,0,0.35)]">
               About Us
-            </motion.p>
-            <motion.h2
-              {...reveal({ offset: 18, transition: { duration: 0.9, delay: 0.3 } })}
-              className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-medium leading-tight text-gray-900 dark:text-white font-sans tracking-tight"
-            >
+            </p>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-medium leading-tight text-gray-900 dark:text-white font-sans tracking-tight">
               We're not just building software  we're engineering the operating
               system for the renewable century.
-            </motion.h2>
+            </h2>
 
-            <motion.p
-              {...reveal({ offset: 18, transition: { duration: 0.9, delay: 0.45 } })}
-              className="mt-6 sm:mt-8 text-sm sm:text-base lg:text-lg leading-relaxed font-sans text-gray-600 dark:text-white"
-            >
+            <p className="mt-6 sm:mt-8 text-sm sm:text-base lg:text-lg leading-relaxed font-sans text-gray-600 dark:text-white">
               At Smart Grid Analytics, our mission is to transform how clean
               energy is orchestrated, controlled, and optimized. Our flagship
               platform,{" "}
@@ -110,12 +96,9 @@ export const About = () => {
               , brings together SCADA, EMS, PPC, EPM, and IB (Intelligent
               Bidding) into a single AI-powered core that makes renewable
               systems faster, smarter, and more reliable than ever.
-            </motion.p>
+            </p>
 
-            <motion.p
-              {...reveal({ offset: 18, transition: { duration: 0.9, delay: 0.6 } })}
-              className="mt-4 sm:mt-5 text-xs sm:text-sm lg:text-base leading-relaxed font-sans text-gray-600 dark:text-white"
-            >
+            <p className="mt-4 sm:mt-5 text-xs sm:text-sm lg:text-base leading-relaxed font-sans text-gray-600 dark:text-white">
               From solar parks and wind farms to hybrid plants and large-scale
               storage,{" "}
               <span className="font-semibold text-orange-600 dark:text-orange-400 [text-shadow:none]">
@@ -126,25 +109,19 @@ export const About = () => {
               It's not just about monitoring — it's about turning data into
               foresight, compliance into confidence, and megawatts into
               intelligence.
-            </motion.p>
+            </p>
           </div>
-        </motion.div>
+        </div>
 
         {/* About the Team Section */}
-        <motion.div
-          {...reveal({ transition: { duration: 0.9, delay: 0.4 } })}
-          className="mt-12 sm:mt-16 lg:mt-32"
-        >
+        <div className="mt-12 sm:mt-16 lg:mt-32">
           <p className="text-center text-gray-500 dark:text-gray-500 text-xs sm:text-sm font-semibold uppercase tracking-wider mb-6 sm:mb-8 font-sans">
             About our team
           </p>
 
           <div className="space-y-12 sm:space-y-16 md:space-y-24 lg:space-y-48 mt-8 sm:mt-12 lg:mt-28 py-4 sm:py-6 lg:py-8">
             {/* Team Member 1 - Kumar M */}
-            <motion.div
-              {...reveal({ direction: "right", offset: 30, transition: { duration: 0.9, delay: 0.1 } })}
-              className="relative border-2 border-gray-300 dark:border-gray-700 rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-10 backdrop-blur-md bg-white/50 dark:bg-black/50 min-h-[200px] sm:min-h-[280px] lg:min-h-[320px]"
-            >
+            <div className="relative border-2 border-gray-300 dark:border-gray-700 rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-10 backdrop-blur-md bg-white/50 dark:bg-black/50 min-h-[200px] sm:min-h-[280px] lg:min-h-[320px]">
               {/* Mobile/Tablet Layout */}
               <div className="lg:hidden flex flex-col items-center mb-4 sm:mb-6">
                 <div className="w-32 sm:w-40 h-32 sm:h-40 rounded-2xl overflow-hidden mb-4">
@@ -182,13 +159,10 @@ export const About = () => {
                   A visionary in the energy sector with over 20 years of hands-on experience, Kumar M has been at the forefront of renewable innovation, grid automation, and digital transformation. Since founding Armax in 2005 and later Smart Grid Analytics, he has led the development of intelligent energy platforms that now power gigawatts of assets globally. His work bridges deep engineering insight with entrepreneurial foresight—delivering technologies like Solvyn that are redefining how renewable infrastructure is monitored, controlled, and optimized.
                 </p>
               </div>
-            </motion.div>
+            </div>
 
             {/* Team Member 2 - Venkata Krishnan */}
-            <motion.div
-              {...reveal({ direction: "left", offset: 30, transition: { duration: 0.9, delay: 0.15 } })}
-              className="relative border-2 border-gray-300 dark:border-gray-700 rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-10 backdrop-blur-md bg-white/50 dark:bg-black/50 min-h-[200px] sm:min-h-[280px] lg:min-h-[320px]"
-            >
+            <div className="relative border-2 border-gray-300 dark:border-gray-700 rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-10 backdrop-blur-md bg-white/50 dark:bg-black/50 min-h-[200px] sm:min-h-[280px] lg:min-h-[320px]">
               {/* Mobile/Tablet Layout */}
               <div className="lg:hidden flex flex-col items-center mb-4 sm:mb-6">
                 <div className="w-32 sm:w-40 h-32 sm:h-40 rounded-2xl overflow-hidden mb-4">
@@ -226,13 +200,10 @@ export const About = () => {
                   A growth architect with over two decades of experience in renewable energy and industrial automation, Venkata Krishnan brings a rare blend of strategic insight and executional excellence. As Co-founder and CGO of Smart Grid Analytics, he leads global expansion, partnerships, and customer success—driving Solvyn's adoption across diverse energy markets. His deep understanding of utility-scale operations and ability to translate technical solutions into business value makes him a catalyst for transformation in the clean energy ecosystem.
                 </p>
               </div>
-            </motion.div>
+            </div>
 
             {/* Team Member 3 - Tirumaleswara Reddy K */}
-            <motion.div
-              {...reveal({ direction: "right", offset: 30, transition: { duration: 0.9, delay: 0.1 } })}
-              className="relative border-2 border-gray-300 dark:border-gray-700 rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-10 backdrop-blur-md bg-white/50 dark:bg-black/50 min-h-[200px] sm:min-h-[280px] lg:min-h-[320px]"
-            >
+            <div className="relative border-2 border-gray-300 dark:border-gray-700 rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-10 backdrop-blur-md bg-white/50 dark:bg-black/50 min-h-[200px] sm:min-h-[280px] lg:min-h-[320px]">
               {/* Mobile/Tablet Layout */}
               <div className="lg:hidden flex flex-col items-center mb-4 sm:mb-6">
                 <div className="w-32 sm:w-40 h-32 sm:h-40 rounded-2xl overflow-hidden mb-4">
@@ -270,13 +241,10 @@ export const About = () => {
                   A software innovator with over two decades of experience in architecting scalable enterprise platforms, Tirumaleswara Reddy K leads the technology vision at Smart Grid Analytics. As CTO, he drives the design and development of Solvyn—an integrated, cloud-native platform built for the complexities of modern renewable energy systems. His expertise spans system architecture, data engineering, cybersecurity, and intelligent automation, making him the backbone of Solvyn's transformation from concept to global deployment.
                 </p>
               </div>
-            </motion.div>
+            </div>
 
             {/* Team Member 4 - Pankaj Ghai */}
-            <motion.div
-              {...reveal({ direction: "left", offset: 30, transition: { duration: 0.9, delay: 0.15 } })}
-              className="relative border-2 border-gray-300 dark:border-gray-700 rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-10 backdrop-blur-md bg-white/50 dark:bg-black/50 min-h-[200px] sm:min-h-[280px] lg:min-h-[320px]"
-            >
+            <div className="relative border-2 border-gray-300 dark:border-gray-700 rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-10 backdrop-blur-md bg-white/50 dark:bg-black/50 min-h-[200px] sm:min-h-[280px] lg:min-h-[320px]">
               {/* Mobile/Tablet Layout */}
               <div className="lg:hidden flex flex-col items-center mb-4 sm:mb-6">
                 <div className="w-32 sm:w-40 h-32 sm:h-40 rounded-2xl overflow-hidden mb-4">
@@ -314,9 +282,9 @@ export const About = () => {
                   A seasoned leader in private equity and climate infrastructure, Pankaj Ghai brings deep financial and strategic insight to Smart Grid Analytics. As Senior Advisor, he plays a key role in guiding Solvyn's North American growth, forging investor alliances, and shaping long-term value creation. With a track record of driving capital efficiency and scaling climate-focused ventures, he bridges financial discipline with purpose-driven innovation in the clean energy sector.
                 </p>
               </div>
-            </motion.div>
+            </div>
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

@@ -1,13 +1,11 @@
 "use client";
 
 import React, { useRef, useEffect, useState, useCallback } from "react";
-import { motion } from "framer-motion";
 import { ServicesBeams } from "../ui/ServicesBeams";
 import { useServicesAnimation } from "../../hooks/useServicesAnimation";
 import { Points } from "../../types/solvynTypes";
 import Image from "next/image";
 import { useTheme } from "next-themes";
-import { reveal, revealScale } from "@/lib/scrollReveal";
 import { useDiagramAnimationReady } from "@/lib/useDiagramAnimationReady";
 
 // Import icons for features
@@ -17,8 +15,6 @@ import provenIcon from "@/app/Icons/Proven.svg";
 import innovationIcon from "@/app/Icons/INNOVATION.svg";
 import energyIcon from "@/app/Icons/energyefficiency.svg";
 import aiIcon from "@/app/Icons/AiTechnology.svg";
-import { Icon } from "@/components/ui/Icon";
-
 export const Services = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const centerRef = useRef<HTMLDivElement>(null);
@@ -171,12 +167,6 @@ export const Services = () => {
 
     observeElements();
 
-    // IntersectionObserver: re-run measurements whenever the section scrolls
-    // into view. This is the key fix for the "animation only works after a
-    // refresh" bug — the framer-motion `whileInView` entry animations start
-    // the icons/logo at scale 0, which gives them a 0×0 bounding box. Without
-    // this observer, we'd measure too early (when everything is collapsed)
-    // and never re-measure once the entry animation completes.
     let intersectionTimers: ReturnType<typeof setTimeout>[] = [];
     const intersectionObserver = new IntersectionObserver(
       (entries) => {
@@ -220,17 +210,6 @@ export const Services = () => {
       timers.forEach((timer) => clearTimeout(timer));
     };
   }, [measure, isMobile, isTablet, mounted]);
-
-  // Trigger a fresh measurement after any of the entry animations complete
-  // (center logo scaling from 0 → 1, or the energy icons sliding up). Without
-  // this, we rely on setTimeouts racing the animation, which is what caused
-  // the "animation only works on refresh" bug.
-  const handleEntryAnimationComplete = useCallback(() => {
-    requestAnimationFrame(() => {
-      requestAnimationFrame(measure);
-      setTimeout(measure, 100);
-    });
-  }, [measure]);
 
   // Animation hook
   useServicesAnimation({
@@ -309,46 +288,26 @@ export const Services = () => {
     >
       {/* ====== TITLE ====== */}
       <div className="max-w-7xl mx-auto mb-2 sm:mb-8 md:mb-12">
-      <motion.div
-          {...reveal({ transition: { duration: 0.9 } })}
-          className="mb-0 sm:mb-6 md:mb-8 lg:mb-16"
-        >
+        <div className="mb-0 sm:mb-6 md:mb-8 lg:mb-16">
           <p className="text-center text-gray-500 dark:text-gray-500 text-xs sm:text-sm font-semibold uppercase tracking-wider mb-2 sm:mb-4 md:mb-6 lg:mb-8 font-sans">
             Services
           </p>
-        </motion.div>
+        </div>
 
-        <motion.p
-          {...reveal({ offset: 18, transition: { duration: 0.9, delay: 0.2 } })}
-          className="text-center text-gray-600 dark:text-gray-400 text-sm sm:text-base md:text-lg font-sans leading-relaxed max-w-3xl mx-auto px-4"
-        >
+        <p className="text-center text-gray-600 dark:text-gray-400 text-sm sm:text-base md:text-lg font-sans leading-relaxed max-w-3xl mx-auto px-4">
           Comprehensive energy solutions powered by cutting-edge technology
-        </motion.p>
+        </p>
       </div>
 
       {/* ====== CENTER ANIMATION ====== */}
-      <motion.div
-        {...revealScale({ from: 0.95, transition: { duration: 0.9, delay: 0.4 } })}
-        onAnimationComplete={handleEntryAnimationComplete}
-        className="max-w-6xl mx-auto"
-      >
+      <div className="max-w-6xl mx-auto">
         <div
           ref={containerRef}
           className="relative w-full min-h-[400px] sm:min-h-[550px] md:min-h-[600px] lg:min-h-[500px] flex items-center justify-center px-2 sm:px-4 py-4 sm:py-12"
         >
           {/* Center logo */}
-          <motion.div
+          <div
             ref={centerRef}
-            initial={{ scale: 0 }}
-            whileInView={{ scale: 1 }}
-            transition={{
-              duration: 0.7,
-              delay: 0.6,
-              type: "spring",
-              bounce: 0.4,
-            }}
-            viewport={{ once: true, margin: "0px 0px -80px 0px" }}
-            onAnimationComplete={handleEntryAnimationComplete}
             className="absolute top-12 sm:top-16 md:top-20 left-1/2 -translate-x-1/2 z-20"
           >
             <div className="relative w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 rounded-2xl sm:rounded-3xl bg-gradient-to-br from-orange-500 via-purple-600 to-orange-500 p-[2px] shadow-2xl hover:shadow-orange-500/30 dark:hover:shadow-orange-500/50 transition-all duration-500 hover:scale-110 group">
@@ -363,25 +322,15 @@ export const Services = () => {
                 />
               </div>
             </div>
-          </motion.div>
+          </div>
 
           {/* Energy service icons */}
           <div className="absolute top-48 sm:top-56 md:top-64 lg:top-72 left-1/2 -translate-x-1/2 w-full max-w-4xl px-2 sm:px-4">
             <div className="grid grid-cols-4 gap-2 sm:gap-4 md:gap-6 lg:gap-8">
               {energyServices.map((service, index) => (
-                <motion.div
+                <div
                   key={service.title}
                   ref={service.ref}
-                  initial={{ y: 40, scale: 0.85 }}
-                  whileInView={{ y: 0, scale: 1 }}
-                  transition={{
-                    duration: 0.7,
-                    delay: 0.8 + index * 0.1,
-                    type: "spring",
-                    bounce: 0.35,
-                  }}
-                  viewport={{ once: true, margin: "0px 0px -60px 0px" }}
-                  onAnimationComplete={handleEntryAnimationComplete}
                   className="flex flex-col items-center group cursor-pointer"
                 >
                   <div className={`relative w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 rounded-xl sm:rounded-2xl p-[2px] shadow-md transition-all duration-500 group-hover:scale-110 ${
@@ -427,7 +376,7 @@ export const Services = () => {
                   <p className="mt-1 text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 text-center font-sans leading-relaxed px-1">
                     {service.description}
                   </p>
-                </motion.div>
+                </div>
               ))}
             </div>
           </div>
@@ -444,7 +393,7 @@ export const Services = () => {
             />
           )}
         </div>
-      </motion.div>
+      </div>
 
       {/* ====== NEW FEATURES SECTION BELOW ====== */}
       <section
@@ -453,36 +402,29 @@ export const Services = () => {
       >
         {/* Title */}
         <div className="max-w-7xl mx-auto mb-2 sm:mb-6 md:mb-8 w-full px-2 sm:px-4">
-        <motion.div
-          {...reveal({ transition: { duration: 0.9 } })}
-          className="mb-0 sm:mb-6 md:mb-8 lg:mb-16"
-        >
-          <p className="text-center py-2 sm:py-4 md:py-6 lg:py-8 text-gray-500 dark:text-gray-500 text-xs sm:text-sm font-semibold uppercase tracking-wider mb-2 sm:mb-4 md:mb-6 lg:mb-8 font-sans">
-            Why Smart Grid Analytics?
-          </p>
-        </motion.div>
+          <div className="mb-0 sm:mb-6 md:mb-8 lg:mb-16">
+            <p className="text-center py-2 sm:py-4 md:py-6 lg:py-8 text-gray-500 dark:text-gray-500 text-xs sm:text-sm font-semibold uppercase tracking-wider mb-2 sm:mb-4 md:mb-6 lg:mb-8 font-sans">
+              Why Smart Grid Analytics?
+            </p>
+          </div>
 
           {/* Description */}
-          <motion.div
-            {...reveal({ offset: 18, transition: { duration: 0.9, delay: 0.2 } })}
-            className="max-w-4xl mx-auto mb-6 sm:mb-8 w-full"
-          >
+          <div className="max-w-4xl mx-auto mb-6 sm:mb-8 w-full">
             <p className="text-center text-gray-700 dark:text-gray-300 text-sm sm:text-base md:text-lg leading-relaxed mb-3 sm:mb-4 px-2">
               Founded by control engineers and energy futurists, we built <span className="font-semibold text-orange-600 dark:text-orange-400">Solvyn</span> — the only platform unifying SCADA, EMS, PPC, EPM, Intelligent Bidding, Digital Twin, and AI analytics into one seamless system.
             </p>
             <p className="text-center text-gray-600 dark:text-gray-400 text-xs sm:text-sm md:text-base leading-relaxed px-2">
               With <span className="font-semibold text-gray-800 dark:text-gray-200">85+ GW of assets under management across 20 countries</span>, we transform megawatts into decisions and data into foresight — enabling real-time visibility, AI-driven fault prevention, automated dispatch, and built-in compliance with CEA, IEC 62443, AEMO, and global grid codes.
             </p>
-          </motion.div>
+          </div>
         </div>
 
         {/* Feature cards */}
         <div className="max-w-7xl mx-auto w-full px-2 sm:px-4">
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4 md:gap-6 lg:gap-8">
             {featureData.map((card, index) => (
-              <motion.div
+              <div
                 key={index}
-                {...reveal({ offset: 40, blur: 6, transition: { duration: 0.8, delay: index * 0.08 } })}
                 className="group relative min-h-[240px] sm:min-h-[260px] md:min-h-[280px] p-3 sm:p-4 md:p-6 lg:p-8 overflow-hidden rounded-xl sm:rounded-2xl border-2 border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 hover:border-orange-500 dark:hover:border-orange-500 transition-all duration-500 hover:shadow-[0_0_30px_rgba(249,115,22,0.2)] dark:hover:shadow-[0_0_30px_rgba(249,115,22,0.3)] hover:scale-[1.02]"
               >
                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-500 pointer-events-none z-0 bg-gradient-to-br from-orange-50 via-purple-50 to-white dark:from-orange-950/20 dark:via-purple-950/20 dark:to-gray-950" />
@@ -509,7 +451,7 @@ export const Services = () => {
                     {card.description}
                   </p>
                 </div>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>

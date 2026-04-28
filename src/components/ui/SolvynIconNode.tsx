@@ -1,5 +1,4 @@
 import React from "react";
-import { motion } from "framer-motion";
 import { IconState } from "../../types/solvynTypes";
 
 type IconComponentType = React.ComponentType<{ active: boolean; size?: number }>;
@@ -27,11 +26,9 @@ const SolvynIconNodeInner: React.FC<SolvynIconNodeProps> = ({
   IconComponent,
   svgIconSize,
   position,
-  animationDelay,
   borderColor = "orange",
   isMobile = false,
   isTablet = false,
-  onEntryComplete,
 }) => {
   const isActive = icon.active;
   const activeBorderClass =
@@ -51,13 +48,8 @@ const SolvynIconNodeInner: React.FC<SolvynIconNodeProps> = ({
   const gapSize = isMobile ? "gap-1.5" : isTablet ? "gap-2" : "gap-2.5";
 
   return (
-    <motion.div
+    <div
       ref={icon.ref as React.Ref<HTMLDivElement>}
-      initial={{ opacity: 0, x: 0, y: 0 }}
-      whileInView={{ opacity: 1, x: 0, y: 0 }}
-      transition={{ duration: 0.6, delay: animationDelay }}
-      viewport={{ once: true }}
-      onAnimationComplete={onEntryComplete}
       className={`absolute flex flex-col items-center ${gapSize} cursor-pointer group z-10`}
       style={position}
     >
@@ -76,7 +68,7 @@ const SolvynIconNodeInner: React.FC<SolvynIconNodeProps> = ({
       <span className={`${labelSize} font-semibold text-center text-gray-900 dark:text-gray-100 ${labelMaxWidth} leading-tight px-1.5 sm:px-2 py-0.5 whitespace-normal break-words bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm rounded-md shadow-sm`}>
         {icon.label}
       </span>
-    </motion.div>
+    </div>
   );
 };
 
